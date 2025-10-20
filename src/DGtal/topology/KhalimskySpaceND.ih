@@ -452,6 +452,16 @@ KhalimskySpaceND()
 //-----------------------------------------------------------------------------
 template < DGtal::Dimension dim, typename TInteger>
 inline
+DGtal::KhalimskySpaceND< dim, TInteger>::
+KhalimskySpaceND( const Point & lower,
+		  const Point & upper,
+		  bool isClosed)
+{
+  init( lower, upper, isClosed );
+}
+//-----------------------------------------------------------------------------
+template < DGtal::Dimension dim, typename TInteger>
+inline
 bool
 DGtal::KhalimskySpaceND< dim, TInteger>::
 init( const Point & lower,
@@ -829,6 +839,26 @@ uCoords( const Cell & c ) const
 {
   ASSERT( uIsValid(c) );
   return PreCellularGridSpace::uCoords( c );
+}
+//-----------------------------------------------------------------------------
+template < DGtal::Dimension dim, typename TInteger>
+inline
+typename DGtal::KhalimskySpaceND< dim, TInteger>::Point
+DGtal::KhalimskySpaceND< dim, TInteger>::
+interiorVoxel( const SCell & sc ) const
+{
+  ASSERT( sIsValid(sc) );
+  return PreCellularGridSpace::interiorVoxel( sc );
+}
+//-----------------------------------------------------------------------------
+template < DGtal::Dimension dim, typename TInteger>
+inline
+typename DGtal::KhalimskySpaceND< dim, TInteger>::Point
+DGtal::KhalimskySpaceND< dim, TInteger>::
+exteriorVoxel( const SCell & sc ) const
+{
+  ASSERT( sIsValid(sc) );
+  return PreCellularGridSpace::exteriorVoxel( sc );
 }
 //-----------------------------------------------------------------------------
 template < DGtal::Dimension dim, typename TInteger>

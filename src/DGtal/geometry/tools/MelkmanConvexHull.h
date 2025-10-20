@@ -191,7 +191,7 @@ namespace DGtal
     /**
      * @return the nomber of points constituing the convex hull.
      **/
-    unsigned int size() const;
+    size_t size() const;
     
     /**
      * clear the current content of the convex hull.
@@ -208,7 +208,11 @@ namespace DGtal
 
 
     // ------------------------- Private Datas --------------------------------
-  private:
+  private: 
+    /**
+     * Used to define a default functor to allow default constructor
+     **/
+    Functor myDefaultFunctor{};
     /**
      * Deque container, which stores the vertices of the convex hull
      * NB: the first and last point is the same. 
@@ -221,11 +225,7 @@ namespace DGtal
     /**
      * Predicate devoted to the forward scan
      */
-    ForwardPredicate myForwardPredicate; 
-    /**
-     * Used to define a default functor to allow default constructor
-     **/
-    Functor myDefaultFunctor;
+    ForwardPredicate myForwardPredicate;
     /**
      * first point used to reverse the convexhull container.
      **/

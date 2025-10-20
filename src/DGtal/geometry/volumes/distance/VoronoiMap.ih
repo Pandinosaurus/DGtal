@@ -29,11 +29,6 @@
 
 //////////////////////////////////////////////////////////////////////////////
 #include <cstdlib>
-
-#ifdef VERBOSE
-#include <boost/lexical_cast.hpp>
-#endif
-
 #include "DGtal/kernel/NumberTraits.h"
 
 //////////////////////////////////////////////////////////////////////////////
@@ -76,7 +71,7 @@ void
 DGtal::VoronoiMap<S,P, TSep, TImage>::computeOtherSteps ( const Dimension dim ) const
 {
 #ifdef VERBOSE
-  std::string title = "VoronoiMap dimension " +  boost::lexical_cast<std::string>( dim ) ;
+  std::string title = "VoronoiMap dimension " +  std::to_string( dim ) ;
   trace.beginBlock ( title );
 #endif
 
@@ -91,7 +86,7 @@ DGtal::VoronoiMap<S,P, TSep, TImage>::computeOtherSteps ( const Dimension dim ) 
 
   Domain localDomain(myLowerBoundCopy, myUpperBoundCopy);
 
-#ifdef WITH_OPENMP
+#ifdef DGTAL_WITH_OPENMP
   //Parallel loop
   std::vector<Point> subRangePoints;
   //Starting point precomputation
@@ -100,7 +95,7 @@ DGtal::VoronoiMap<S,P, TSep, TImage>::computeOtherSteps ( const Dimension dim ) 
 
   //We run the 1D problems in //
 #pragma omp parallel for schedule(dynamic)
-  for (size_t i = 0; i < subRangePoints.size(); ++i)
+  for (int i = 0; i < static_cast<int>(subRangePoints.size()); ++i) //MSVC requires signed type for openmp
     computeOtherStep1D ( subRangePoints[i], dim);
 
 #else

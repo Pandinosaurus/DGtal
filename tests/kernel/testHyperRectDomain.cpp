@@ -238,7 +238,6 @@ void testIteratorHelper(
     Iterator const& it_begin, Iterator const& it_end,
     Point pt, Domain const& domain, bool forward = true)
 {
-  using Dimension = typename Domain::Dimension;
   std::vector<Dimension> dimensions(Domain::dimension);
   std::iota(dimensions.begin(), dimensions.end(), Dimension(0));
 
@@ -250,7 +249,6 @@ template <
 >
 void testIterator(Point const& a, Point const& b, Point const& c)
 {
-  using Dimension = typename Point::Dimension;
   using Space = SpaceND<Point::dimension, typename Point::Component>;
   using Domain = HyperRectDomain<Space>;
 
@@ -331,8 +329,7 @@ TEST_CASE( "Iterator 4D", "[iterator][4D]" )
   trace.endBlock();
 }
 
-#ifdef WITH_BIGINTEGER
-TEST_CASE( "Iterator 4D GMP", "[iterator][4D][GMP]" )
+TEST_CASE( "Iterator 4D BigInteger", "[iterator][4D][BigInteger]" )
 {
   using Space = SpaceND<4, BigInteger>;
   using Point = Space::Point;
@@ -341,11 +338,10 @@ TEST_CASE( "Iterator 4D GMP", "[iterator][4D][GMP]" )
   Point b({2, 3, 4, 5});
   Point c({1, 2, 3, 2});
 
-  trace.beginBlock( "Iterator 4D using GMP" );
+  trace.beginBlock( "Iterator 4D using BigInteger" );
   testIterator(a, b, c);
   trace.endBlock();
 }
-#endif
 
 TEST_CASE( "STL compatiblity", "[iterator][4D][STL]" )
 {

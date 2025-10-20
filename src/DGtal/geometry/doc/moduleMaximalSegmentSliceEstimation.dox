@@ -44,7 +44,6 @@ The idea is the following (for a surfel \f$ s \f$):
 4. We finally take the cross product of the two 2D normal vectors.
 
 @image html maximalseg-ellipsoid-slices.png "Two slices on the digitization of an ellipsoid"
-@image latex maximalseg-ellipsoid-slices.png "Two slices on the digitization of an ellipsoid" width=8cm
 
 \section sectMaximalSegmentSliceEstimation2 Usage
 
@@ -69,7 +68,7 @@ using Surfel    = KSpace::SCell;
 using Container = std::vector<Surfel>;
 using Integer   = int;
 short adjacency = 4;
-using SegmentComputerOnSurfels = ArithmeticalDSSComputerOnSurfels<KSpace, Container::const_iterator, Integer, adjacency>;
+using SegmentComputerOnSurfels = ArithmeticalDSSComputerOnSurfels<KSpace, Container::const_iterator, Integer>;
 
 // Instantiation
 SegmentComputerOnSurfels computer(kspace, // A 3D Khalimsky space

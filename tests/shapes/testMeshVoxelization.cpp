@@ -24,7 +24,6 @@
  *
  * This file is part of the DGtal library.
  */
-
 ///////////////////////////////////////////////////////////////////////////////
 #include <iostream>
 #include "ConfigTest.h"
@@ -33,9 +32,7 @@
 #include "DGtal/kernel/sets/CDigitalSet.h"
 #include "DGtal/kernel/domains/HyperRectDomain.h"
 #include "DGtal/io/readers/MeshReader.h"
-#include "DGtal/io/Display3D.h"
 #include "DGtal/io/readers/MeshReader.h"
-#include "DGtal/io/boards/Board3D.h"
 ///////////////////////////////////////////////////////////////////////////////
 
 using namespace DGtal;
@@ -43,13 +40,10 @@ using namespace Z3i;
 
 TEST_CASE("Basic voxelization test", "[voxelization]")
 {
-  using Space3Dint = SpaceND<3>;
-  using Domain   = HyperRectDomain<Space3Dint>;
   using PointR3  = PointVector<3, double>;
   using VectorR3 = PointVector<3, double>;
   using PointR2  = PointVector<2, double>;
   using PointZ3  = PointVector<3, int>;
-  using DigitalSet = DigitalSetBySTLSet<Domain>;
 
   using MeshVoxelizer26 = MeshVoxelizer< DigitalSet, 26>;
   using MeshVoxelizer6 = MeshVoxelizer< DigitalSet, 6>;
@@ -104,33 +98,33 @@ TEST_CASE("Basic voxelization test", "[voxelization]")
 
     v[0] = 3.0;
     v[1] = 3.0;
-    REQUIRE(MeshVoxelizer6::pointIsInside2DTriangle(A, B, C, v) == TriOr::OUTSIDE);
+    REQUIRE(MeshVoxelizer6::pointIsInside2DTriangle(A, B, C, v) == TriOr::TRIANGLE_OUTSIDE);
 
     v[0] = 2.0;
     v[1] = 2.0;
-    REQUIRE(MeshVoxelizer6::pointIsInside2DTriangle(A, B, C, v) == TriOr::INSIDE);
+    REQUIRE(MeshVoxelizer6::pointIsInside2DTriangle(A, B, C, v) == TriOr::TRIANGLE_INSIDE);
 
     v[0] = 2;
     v[1] = 1;
-    REQUIRE(MeshVoxelizer6::pointIsInside2DTriangle(A, B, C, v) == TriOr::ONEDGE);
+    REQUIRE(MeshVoxelizer6::pointIsInside2DTriangle(A, B, C, v) == TriOr::TRIANGLE_ONEDGE);
 
     v[0] = 3;
     v[1] = 1;
-    REQUIRE(MeshVoxelizer6::pointIsInside2DTriangle(A, B, C, v) == TriOr::ONVERTEX);
+    REQUIRE(MeshVoxelizer6::pointIsInside2DTriangle(A, B, C, v) == TriOr::TRIANGLE_ONVERTEX);
 
     // another case
     A = { 16.3299, 0. };
     B = { 0., 16.3299 };
     C = { -16.3299, 0. };
     v = { -17., 0.};
-    REQUIRE(MeshVoxelizer6::pointIsInside2DTriangle(A, B, C, v) == TriOr::OUTSIDE);
+    REQUIRE(MeshVoxelizer6::pointIsInside2DTriangle(A, B, C, v) == TriOr::TRIANGLE_OUTSIDE);
 
     // another case
     A = { -0.891282, 9.91201 };
     B = { -1.40823, 9.91261 };
     C = { -1.36963, 9.37414 };
     v = { -1.16961, 9.83039 };
-    REQUIRE(MeshVoxelizer6::pointIsInside2DTriangle(A, B, C, v) == TriOr::INSIDE);
+    REQUIRE(MeshVoxelizer6::pointIsInside2DTriangle(A, B, C, v) == TriOr::TRIANGLE_INSIDE);
   }
 
   // ---------------------------------------------------------
@@ -164,11 +158,6 @@ TEST_CASE("Basic voxelization test", "[voxelization]")
     MeshVoxelizer26 voxelizer;
 
     voxelizer.voxelize(outputSet, Point(5,0,0), Point(0,5,0), Point(0,0,5));
-    Board3D<Z3i::Space, Z3i::KSpace> board;
-    for(auto p: outputSet)
-      board << p ;
-    board.saveOBJ("triangle26-dig.obj");
-    
     REQUIRE( outputSet.size() == 46 );
   }
 
@@ -180,11 +169,6 @@ TEST_CASE("Basic voxelization test", "[voxelization]")
     MeshVoxelizer6 voxelizer;
 
     voxelizer.voxelize(outputSet, Point(5,0,0), Point(0,5,0), Point(0,0,5));
-    Board3D<Z3i::Space, Z3i::KSpace> board;
-    for(auto p: outputSet)
-      board << p ;
-    board.saveOBJ("triangle6-dig.obj");
-    
     REQUIRE( outputSet.size() == 21 );
   }
   
@@ -201,11 +185,7 @@ TEST_CASE("Basic voxelization test", "[voxelization]")
     CAPTURE(inputMesh.nbFaces());
     
     voxelizer.voxelize(outputSet, inputMesh, 10.0 );
-    Board3D<Z3i::Space, Z3i::KSpace> board;
-    for(auto p: outputSet)
-      board << p ;
-    board.saveOBJ("box6-dig.obj");
-    
+   
     CAPTURE(outputSet.size());
     //hard coded test.
     REQUIRE( outputSet.size() == 2562 );
@@ -223,11 +203,7 @@ TEST_CASE("Basic voxelization test", "[voxelization]")
     CAPTURE(inputMesh.nbFaces());
     
     voxelizer.voxelize(outputSet, inputMesh, 10.0 );
-    Board3D<Z3i::Space, Z3i::KSpace> board;
-    for(auto p: outputSet)
-      board << p ;
-    board.saveOBJ("box26-dig.obj");
-    
+   
     CAPTURE(outputSet.size());
     //hard coded test.
     REQUIRE( outputSet.size() == 4162 );

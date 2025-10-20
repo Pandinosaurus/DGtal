@@ -146,6 +146,16 @@ namespace DGtal
     {
       return static_cast<DGtal::int64_t>(aT);
     }
+    
+    /** @brief
+     * Cast method to DGtal::uint64_t (for I/O or board export uses
+     * only).
+     */
+    static inline constexpr
+    DGtal::uint64_t castToUInt64_t(const T & aT) noexcept
+    {
+      return static_cast<DGtal::uint64_t>(aT);
+    }
 
     /** @brief
      * Cast method to double (for I/O or board export uses
@@ -290,6 +300,16 @@ namespace DGtal
       {
         return static_cast<DGtal::int64_t>(aT);
       }
+      
+      /** @brief
+       * Cast method to DGtal::uint64_t (for I/O or board export uses
+       * only).
+       */
+      static inline constexpr
+      DGtal::uint64_t castToUInt64_t(const T & aT) noexcept
+      {
+        return static_cast<DGtal::uint64_t>(aT);
+      }
 
       /** @brief
        * Cast method to double (for I/O or board export uses
@@ -376,7 +396,6 @@ namespace DGtal
     using UnsignedVersion = T; ///< Alias to the unsigned version of a floating-point type (aka itself).
   }; // end of class NumberTraitsImpl
 
-#ifdef WITH_BIGINTEGER
   /** @brief Specialization of NumberTraitsImpl for DGtal::BigInteger
    *
    * Note that DGtal::BigInteger represents
@@ -402,10 +421,10 @@ namespace DGtal
     typedef typename boost::call_traits<BigInteger>::param_type ParamType;
 
     /// Constant Zero.
-    static const DGtal::BigInteger ZERO;
+    static const DGtal::BigInteger ZERO ;
 
     /// Constant One.
-    static const DGtal::BigInteger ONE;
+    static const DGtal::BigInteger ONE ;
 
     /// Return the zero of this integer.
     static inline
@@ -426,7 +445,7 @@ namespace DGtal
     ReturnType min() noexcept
     {
       FATAL_ERROR_MSG(false, "UnBounded interger type does not support min() function");
-      return ZERO;
+      return zero();
     }
 
     /// Return the maximum possible value (trigger an error since BitInteger is unbounded).
@@ -434,7 +453,7 @@ namespace DGtal
     ReturnType max() noexcept
     {
       FATAL_ERROR_MSG(false, "UnBounded interger type does not support max() function");
-      return ZERO;
+      return zero();
     }
 
     /// Return the number of significant binary digits (trigger an error since BitInteger is unbounded).
@@ -472,9 +491,20 @@ namespace DGtal
     static inline
     DGtal::int64_t castToInt64_t(const DGtal::BigInteger & aT) noexcept
     {
-      return aT.get_si();
+      return static_cast<DGtal::int64_t>(aT);
     }
 
+    /** @brief
+     * Cast method to DGtal::uint64_t (for I/O or board export uses
+     * only).
+     */
+    static inline
+    DGtal::uint64_t castToUInt64_t(const DGtal::BigInteger & aT) noexcept
+    {
+      return static_cast<DGtal::uint64_t>(aT);
+    }
+
+    
     /** @brief
      * Cast method to double (for I/O or board export uses
      * only).
@@ -482,7 +512,7 @@ namespace DGtal
     static inline
     double castToDouble(const DGtal::BigInteger & aT) noexcept
     {
-      return aT.get_d();
+      return static_cast<double>(aT);
     }
 
     /** @brief Check the parity of a number.
@@ -493,7 +523,7 @@ namespace DGtal
     static inline
     bool even( ParamType aT ) noexcept
     {
-      return mpz_even_p( aT.get_mpz_t() );
+      return (boost::multiprecision::integer_modulus(aT, 2) == 0);
     }
 
     /** @brief Check the parity of a number.
@@ -504,14 +534,13 @@ namespace DGtal
     static inline
     bool odd( ParamType aT ) noexcept
     {
-      return mpz_odd_p( aT.get_mpz_t() );
+      return (boost::multiprecision::integer_modulus(aT, 2) == 1);
     }
   }; // end of class NumberTraits<DGtal::BigInteger>.
 
   // Definition of the static attributes in order to allow ODR-usage.
   template <typename Enable> const DGtal::BigInteger NumberTraitsImpl<DGtal::BigInteger, Enable>::ZERO = 0;
   template <typename Enable> const DGtal::BigInteger NumberTraitsImpl<DGtal::BigInteger, Enable>::ONE  = 1;
-#endif
 
   /**
    * Description of template class 'NumberTraits' <p>

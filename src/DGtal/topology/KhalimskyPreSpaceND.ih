@@ -657,7 +657,7 @@ DGtal::Dimension
 DGtal::KhalimskyPreSpaceND< dim, TInteger>::
 uDim( const Cell & p )
 {
-  Integer i = NumberTraits<Integer>::ZERO;
+  DGtal::Dimension i = NumberTraits<DGtal::Dimension>::ZERO;
   for ( DGtal::Dimension k = 0; k < DIM; ++k )
     if ( NumberTraits<Integer>::odd( p.coordinates[ k ] ) )
       ++i;
@@ -670,7 +670,7 @@ DGtal::Dimension
 DGtal::KhalimskyPreSpaceND< dim, TInteger>::
 sDim( const SCell & p )
 {
-  Integer i = NumberTraits<Integer>::ZERO;
+  DGtal::Dimension i = NumberTraits<DGtal::Dimension>::ZERO;
   for ( DGtal::Dimension k = 0; k < DIM; ++k )
     if ( NumberTraits<Integer>::odd( p.coordinates[ k ] ) )
       ++i;
@@ -1382,7 +1382,30 @@ sIndirectIncident( SCell p, DGtal::Dimension k )
 
   return p;
 }
-
+//-----------------------------------------------------------------------------
+template < DGtal::Dimension dim, typename TInteger>
+inline
+typename DGtal::KhalimskyPreSpaceND< dim, TInteger >::Point
+DGtal::KhalimskyPreSpaceND< dim, TInteger >::
+interiorVoxel( const SCell &p) 
+{
+  ASSERT(sDim(p) == (dimension - 1));
+  auto d = sOrthDir( p );
+  auto voxel = sIncident( p, d, sDirect( p, d ) );
+  return sCoords( voxel );
+}
+//-----------------------------------------------------------------------------
+template < DGtal::Dimension dim, typename TInteger>
+inline
+typename DGtal::KhalimskyPreSpaceND< dim, TInteger >::Point
+DGtal::KhalimskyPreSpaceND< dim, TInteger >::
+exteriorVoxel( const SCell &p)
+{
+  ASSERT(sDim(p) == (dimension - 1));
+  auto d = sOrthDir( p );
+  auto voxel = sIncident( p, d, !sDirect( p, d ) );
+  return sCoords( voxel );
+}
 
 
 

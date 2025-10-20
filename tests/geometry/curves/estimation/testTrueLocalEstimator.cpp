@@ -130,7 +130,6 @@ testTrueLocalEstimatorOnShapeDigitization( const string & name,
            + name ). c_str() );
   
   // Creates a digitizer on the window (xLow, xUp).
-  typedef Space::RealPoint RealPoint;
   RealPoint xLow( -10.0, -10.0 );
   RealPoint xUp( 10.0, 10.0 );
   GaussDigitizer<Space,Shape> dig;
@@ -161,7 +160,7 @@ testTrueLocalEstimatorOnShapeDigitization( const string & name,
       Surfaces<KSpace>::track2DBoundaryPoints( points, K, SAdj, dig, bel );
       // Create GridCurve
       GridCurve<KSpace> gridcurve;
-      gridcurve.initFromVector( points );
+      gridcurve.initFromPointsVector( points );
 
       typedef GridCurve<KhalimskySpaceND<2> >::PointsRange Range;
       typedef Range::ConstIterator ConstIteratorOnPoints;

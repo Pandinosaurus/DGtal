@@ -453,7 +453,7 @@ namespace DGtal
       }
       // Orient them consistently
       for ( Index c = 0; c < nbCells(); c++ ) {
-        const auto& c_vtcs = cellVertices( c );
+        //const auto& c_vtcs = cellVertices( c ); //not used
         for ( auto f : cellFaces( c ) ) {
           if ( ! f.second ) continue; // process only 'true' faces
           const   auto ov = faceComplementVertices( f );
@@ -483,10 +483,10 @@ namespace DGtal
       Matrix A;
       Vector N;
       Scalar c;
-      for ( int i = 1; i < dimension; i++ )
-        for ( int j = 0; j < dimension; j++ )
+      for ( size_t i = 1; i < dimension; i++ )
+        for ( size_t j = 0; j < dimension; j++ )
           A.setComponent( i-1, j, position( v[ i ] )[ j ] - position( v[ 0 ] )[ j ] );
-      for ( int j = 0; j < dimension; j++ )
+      for ( size_t j = 0; j < dimension; j++ )
         N[ j ] = A.cofactor( dimension-1, j );
       c = N.dot( position( v[ 0 ] ) );
       return std::make_pair( N, c );

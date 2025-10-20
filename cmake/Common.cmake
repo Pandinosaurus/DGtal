@@ -2,7 +2,7 @@
 # -- Messages
 #------------------------------------------------------------------------------
 message(STATUS "-------------------------------------------------------------------------------")
-message(STATUS "DGtal Version ${PROJECT_VERSION}")
+message(STATUS "DGtal Version ${DGTAL_VERSION}")
 message(STATUS "-------------------------------------------------------------------------------" )
 message(STATUS "Source DIR is ${PROJECT_SOURCE_DIR}")
 message(STATUS "Binary/Build DIR is ${PROJECT_BINARY_DIR}")
@@ -28,9 +28,9 @@ endforeach()
 
 
 # -----------------------------------------------------------------------------
-# CPP11
+# CPP20
 # -----------------------------------------------------------------------------
-set(DGTAL_CMAKE_CXX_STANDARD_MIN_REQUIRED 11)
+set(DGTAL_CMAKE_CXX_STANDARD_MIN_REQUIRED 20)
 if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD ${DGTAL_CMAKE_CXX_STANDARD_MIN_REQUIRED})
 else()
@@ -44,11 +44,14 @@ if(NOT CMAKE_CXX_STANDARD_REQUIRED)
   set(CMAKE_CXX_STANDARD_REQUIRED ON)
 endif()
 
+message(STATUS "C++ standard set to ${CMAKE_CXX_STANDARD}")
+
 # -----------------------------------------------------------------------------
-# Visual Studio : to distinguish between debug and release lib
+# Visual Studio : to distinguish between debug and release lib and /bigobj flag
 # -----------------------------------------------------------------------------
 if (MSVC)
   set(CMAKE_DEBUG_POSTFIX "d")
+   add_compile_options(/bigobj)
 endif()
 
 # -----------------------------------------------------------------------------
@@ -80,36 +83,32 @@ include(TargetDoxygenDox OPTIONAL)
 # -----------------------------------------------------------------------------
 # uninstall target
 # -----------------------------------------------------------------------------
+option(DGTAL_REMOVE_UNINSTALL "Remove DGtal uninstall target." OFF)
+if (NOT DGTAL_REMOVE_UNINSTALL)
 configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/cmake/TargetUninstall.cmake.in
   ${CMAKE_CURRENT_BINARY_DIR}/TargetUninstall.cmake
   @ONLY)
 add_custom_target(uninstall
   "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/TargetUninstall.cmake")
+endif()
 
 # -----------------------------------------------------------------------------
 # Parsing cmake options
 # -----------------------------------------------------------------------------
 if (MSVC)
-  option(BUILD_SHARED_LIBS "Build shared libraries." OFF)
+  option(DGTAL_BUILD_SHARED_LIBS "Build shared libraries." OFF)
 else()
-  option(BUILD_SHARED_LIBS "Build shared libraries." ON)
+  option(DGTAL_BUILD_SHARED_LIBS "Build shared libraries." OFF)
 endif()
-option(BUILD_TESTING "Build testing." OFF)
-option(DEBUG_VERBOSE "Verbose debug messages." OFF)
-option(VERBOSE "Verbose messages." OFF)
-option(COLOR_WITH_ALPHA_ARITH "Consider alpha channel in color arithmetical operations." OFF)
+
+option(DGTAL_DEBUG_VERBOSE "Verbose debug messages." OFF)
+option(DGTAL_VERBOSE "Verbose messages." OFF)
+option(DGTAL_COLOR_WITH_ALPHA_ARITH "Consider alpha channel in color arithmetical operations." OFF)
 option(DGTAL_NO_ESCAPED_CHAR_IN_TRACE "Avoid printing special color and font weight terminal escaped char in program output." OFF)
 option(DGTAL_CONFIG_HINTS "Provide HINTS to find_dependency in DGtalConfig.cmake. Projects consuming DGtal does not have to provide FOO_DIR to their project, where FOO is a DGtal dependency. Recommended to turn it off when deploying." ON)
 mark_as_advanced(DGTAL_CONFIG_HINTS)
-
-# -----------------------------------------------------------------------------
-# Benchmark target
-# -----------------------------------------------------------------------------
-option(BUILD_BENCHMARKS "Build benchmarks." OFF)
-if(BUILD_BENCHMARKS)
-  add_custom_target(benchmark COMMAND echo "Benchmarks launched.....")
-endif()
+option(DGTAL_NO_ADD_STBIMAGE_IMPLEMENT "To avoid duplicated linking errors (like LNK2005 in MSVC)" OFF)
 
 #------------------------------------------------------------------------------
 # Some directories and files should also be cleaned when invoking 'make clean'

@@ -45,7 +45,6 @@
 // Inclusions
 #include <iostream>
 #include <vector>
-#include "DGtal/base/Common.h"
 #include "DGtal/kernel/NumberTraits.h"
 #include "DGtal/kernel/CPointPredicate.h"
 #include "DGtal/geometry/volumes/distance/CSeparableMetric.h"
@@ -204,12 +203,12 @@ namespace DGtal
     }
 
     /**
-     * Access to a Voronoi vector inducing the DistanceMap value
+     * Access to the Voronoi site inducing the DistanceMap value
      * (a.k.a. the  vector such that its norm is the DT value) at a point.
      *
      * @param [in] aPoint the point to probe.
      */
-    Vector getVoronoiVector(const Point &aPoint) const
+    Vector getVoronoiSite(const Point &aPoint) const
     {
       return this->myImagePtr->operator()(aPoint);
     }

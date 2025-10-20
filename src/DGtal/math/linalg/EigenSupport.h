@@ -39,7 +39,6 @@
 #define EigenSupport_h
 
 /** Prevents inclusion if Eigen support hasn't been enabled **/
-#if defined(WITH_EIGEN)
 
 //////////////////////////////////////////////////////////////////////////////
 // Eigen API extensions
@@ -78,75 +77,72 @@
 
 namespace DGtal
 {
-
-/////////////////////////////////////////////////////////////////////////////
-// struct EigenLinearAlgebraBackend
-/**
- * Description of struct 'EigenLinearAlgebraBackend' <p>
- * \brief Aim:
- * Provide linear algebra backend using Eigen dense and sparse matrix as well as dense vector.
- * 6 linear solvers available:
- *  - EigenLinearAlgebraBackend::SolverSimplicialLLT
- *  - EigenLinearAlgebraBackend::SolverSimplicialLDLT
- *  - EigenLinearAlgebraBackend::SolverConjugateGradient
- *  - EigenLinearAlgebraBackend::SolverBiCGSTAB
- *  - EigenLinearAlgebraBackend::SolverSparseLU
- *  - EigenLinearAlgebraBackend::SolverSparseQR
- * Eigen solvers documentation <a href="http://eigen.tuxfamily.org/dox/group__TopicSparseSystems.html">here</a>
- */
-struct EigenLinearAlgebraBackend
-{
+  /////////////////////////////////////////////////////////////////////////////
+  // struct EigenLinearAlgebraBackend
+  /**
+   * Description of struct 'EigenLinearAlgebraBackend' <p>
+   * \brief Aim:
+   * Provide linear algebra backend using Eigen dense and sparse matrix as well as dense vector.
+   * 6 linear solvers available:
+   *  - EigenLinearAlgebraBackend::SolverSimplicialLLT
+   *  - EigenLinearAlgebraBackend::SolverSimplicialLDLT
+   *  - EigenLinearAlgebraBackend::SolverConjugateGradient
+   *  - EigenLinearAlgebraBackend::SolverBiCGSTAB
+   *  - EigenLinearAlgebraBackend::SolverSparseLU
+   *  - EigenLinearAlgebraBackend::SolverSparseQR
+   * Eigen solvers documentation <a href="http://eigen.tuxfamily.org/dox/group__TopicSparseSystems.html">here</a>
+   */
+  struct EigenLinearAlgebraBackend
+  {
     typedef Eigen::VectorXd DenseVector;
     typedef Eigen::MatrixXd DenseMatrix;
     typedef Eigen::VectorXi IntegerVector;
-
-    typedef Eigen::Triplet<double> Triplet;
+    
     typedef Eigen::SparseMatrix<DenseVector::Scalar, Eigen::ColMajor, DenseVector::Index> SparseMatrix;
-
+    typedef Eigen::Triplet<double, SparseMatrix::StorageIndex> Triplet;
+    
+    /// Solvers on sparse matrices.
     typedef Eigen::SimplicialLLT<SparseMatrix> SolverSimplicialLLT;
     typedef Eigen::SimplicialLDLT<SparseMatrix> SolverSimplicialLDLT;
     typedef Eigen::ConjugateGradient<SparseMatrix> SolverConjugateGradient;
     typedef Eigen::BiCGSTAB<SparseMatrix> SolverBiCGSTAB;
     typedef Eigen::SparseLU<SparseMatrix> SolverSparseLU;
     typedef Eigen::SparseQR<SparseMatrix, Eigen::COLAMDOrdering<SparseMatrix::Index> > SolverSparseQR;
-};
-///////////////////////////////////////////////////////////////////////////////
-
-
-/**
- * Overloads 'operator<<' for displaying objects of class 'Eigen::ComputationInfo'.
- * @param os the output stream where the object is written.
- * @param info the object of class 'EigenSupport' to write.
- * @return the output stream after the writing.
- */
-inline
-std::ostream&
-operator<<(std::ostream & os, const Eigen::ComputationInfo& info)
-{
+  };
+  ///////////////////////////////////////////////////////////////////////////////
+  
+  
+  /**
+   * Overloads 'operator<<' for displaying objects of class 'Eigen::ComputationInfo'.
+   * @param os the output stream where the object is written.
+   * @param info the object of class 'EigenSupport' to write.
+   * @return the output stream after the writing.
+   */
+  inline
+  std::ostream&
+  operator<<(std::ostream & os, const Eigen::ComputationInfo& info)
+  {
     switch (info)
     {
-        case Eigen::Success:
-            os << "success";
-            break;
-        case Eigen::NumericalIssue:
-            os << "numerical_issue";
-            break;
-        case Eigen::NoConvergence:
-            os << "no_convergence";
-            break;
-        case Eigen::InvalidInput:
-            os << "invalid_input";
-            break;
+      case Eigen::Success:
+        os << "success";
+        break;
+      case Eigen::NumericalIssue:
+        os << "numerical_issue";
+        break;
+      case Eigen::NoConvergence:
+        os << "no_convergence";
+        break;
+      case Eigen::InvalidInput:
+        os << "invalid_input";
+        break;
     }
-
+    
     return os;
-}
-
+  }
+  
 } // namespace DGtal
 
-#else // defined WITH_EIGEN
-#error "DGtal Eigen support hasn't been enabled"
-#endif // defined WITH_EIGEN
 #endif // !defined EigenSupport_h
 
 #undef EigenSupport_RECURSES

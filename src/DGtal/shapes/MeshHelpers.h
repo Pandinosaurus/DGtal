@@ -64,6 +64,8 @@ namespace DGtal
   {
     // ----------------------- Static services ------------------------------
   public:
+    
+    
     /// Builds a triangulated surface (class TriangulatedSurface) from
     /// a mesh (class Mesh). Note that a triangulated surface contains
     /// only triangles, so polygonal faces (0,1,2,3,4,...) of the
@@ -203,6 +205,30 @@ namespace DGtal
       PolygonalSurface<typename CellEmbedder::Value>& polysurf,
       CellMap& cellmap );
     
+    /// Builds a polygonal surface (class SurfaceMesh) from
+    /// the primal graph of a digital surface in K^3 (class
+    /// DigitalSurface). The digital surface does not need to be
+    /// a combinatorial 2-manifold.
+    ///
+    /// @tparam DigitalSurfaceContainer the container chosen for the digital surface.
+    /// @tparam CellEmbedder the embedder chosen for the digital surface.
+    /// @tparam CellMap the type for encoding the map 0-cell -> Index.
+    ///
+    /// @param[in]  dsurf the input digital surface.
+    /// @param[in]  cembedder the embedder for 0-cells of the digital surface, which are vertices in the output polygonal surface.
+    /// @param[out] polysurf the output polygonal surface mesh.
+    /// @param[out] cellmap the output mapping between a 0-cell of \a dsurf and an Index in \a polysurf.
+    /// @return 'true' if it was able to build the primal polygonal surface, otherwise the digital surface was not a combinatorial 2-manifold and is not valid.
+    template < typename DigitalSurfaceContainer,
+    typename CellEmbedder,
+    typename CellMap >
+    static
+    bool digitalSurface2PrimalSurfaceMesh
+    ( const DigitalSurface<DigitalSurfaceContainer>& dsurf,
+     const CellEmbedder& cembedder,
+     SurfaceMesh<typename CellEmbedder::Value,typename CellEmbedder::Value>& polysurf,
+     CellMap& cellmap );
+    
     
     /// Builds a mesh (class Mesh) from a triangulated surface (class
     /// TriangulatedSurface). Note that the mesh looses the topology
@@ -273,6 +299,31 @@ namespace DGtal
       const PolygonalSurface<Point>& polysurf );
 
 
+    /// Exports a SurfaceMesh as an OBJ file
+    /// (with topology) into the given output stream. It can also
+    /// specifies normals per face and colors per face.
+    ///
+    /// @tparam SurfaceMesh A model of a SurfaceMesh
+    /// @param[in,out] output_obj an output stream where the OBJ file is written.
+    /// @param[in]     mtl_filename the name of the material filename (stores colors).
+    /// @param[in]     surf the input triangulated or polygonal surface mesh.
+    /// @param[in]     normals either empty or a vector of size `polysurf.nbFaces` specifying the normal vector for each face.
+    /// @param[in]     diffuse_colors either empty or a vector of size `polysurf.nbFaces` specifying the diffuse color for each face.
+    /// @param[in]     ambient_color the ambient color of all faces.
+    /// @param[in]     diffuse_color the diffuse color of all faces if \a diffuse_colors was empty.
+    /// @param[in]     specular_color the specular color of all faces.
+    template <typename SurfaceMesh>
+    static
+    bool exportOBJwithFaceNormalAndColor
+    ( std::ostream& output_obj,
+      const std::string&             mtl_filename,
+      const SurfaceMesh& surf,
+      const std::vector< typename SurfaceMesh::RealPoint >&    normals,
+      const std::vector< Color >&    diffuse_colors,
+      const Color&                   ambient_color  = Color( 32, 32, 32 ),
+      const Color&                   diffuse_color  = Color( 200, 200, 255 ),
+      const Color&                   specular_color = Color::White );
+
     /// Exports a triangulated or polygonal surface as an OBJ file
     /// (with topology) into the given output stream. It can also
     /// specifies normals per face and colors per face.
@@ -309,7 +360,7 @@ namespace DGtal
     static
     bool exportMTLNewMaterial
     ( std::ostream& output_mtl,
-      unsigned int idxMaterial,
+      unsigned long idxMaterial,
       const Color& ambient_color,
       const Color& diffuse_color,
       const Color& specular_color );

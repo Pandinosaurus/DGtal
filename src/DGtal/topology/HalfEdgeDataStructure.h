@@ -54,7 +54,7 @@ namespace DGtal
   /// because there was link error with gcc 4.8.4 for all variants
   /// within HalfEdgeDataStructure (e.g. BOOST_STATIC_CONSTANT, c++
   /// constexpr, c++ constexpr with const reference).
-  static std::size_t const HALF_EDGE_INVALID_INDEX = boost::integer_traits<std::size_t>::const_max;
+  static std::size_t const HALF_EDGE_INVALID_INDEX = std::numeric_limits<std::size_t>::max();
   
   /////////////////////////////////////////////////////////////////////////////
   // class HalfEdgeDataStructure
@@ -892,10 +892,10 @@ namespace DGtal
       const EdgeIndex ev13 = halfEdge( iext1nn ).edge;
       const EdgeIndex ev14 = halfEdge( iext2n ).edge;
       // For debug
-      int nbV1 = nbNeighboringVertices( v1 );
-      int nbV2 = nbNeighboringVertices( v2 );
-      int nbV3 = nbNeighboringVertices( v3 );
-      int nbV4 = nbNeighboringVertices( v4 );
+      auto nbV1 = nbNeighboringVertices( v1 );
+      auto nbV2 = nbNeighboringVertices( v2 );
+      auto nbV3 = nbNeighboringVertices( v3 );
+      auto nbV4 = nbNeighboringVertices( v4 );
       // Changes toVertex field of half-edges pointing to v2	 
       std::vector<VertexIndex> outer_v;  // stores vertices around v2
       std::vector<Index>       inner_he; // stores half-edges from v2
@@ -950,9 +950,9 @@ namespace DGtal
 	myArc2Index[ Arc( v1, v4 ) ] = iext2nn;
       }
       // Debug
-      int new_nbV1 = nbNeighboringVertices( v1 );
-      int new_nbV3 = nbNeighboringVertices( v3 );
-      int new_nbV4 = nbNeighboringVertices( v4 );
+      auto new_nbV1 = nbNeighboringVertices( v1 );
+      auto new_nbV3 = nbNeighboringVertices( v3 );
+      auto new_nbV4 = nbNeighboringVertices( v4 );
       if ( ( new_nbV1 != nbV1+nbV2-4 )
 	   || ( new_nbV3 != nbV3 -1 )
 	   || ( new_nbV4 != nbV4 -1 ) )

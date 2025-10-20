@@ -49,13 +49,11 @@
 #include "DGtal/io/readers/PPMReader.h"
 #include "DGtal/io/readers/PGMReader.h"
 #include "DGtal/io/readers/RawReader.h"
-#ifdef WITH_HDF5
+#include "DGtal/io/readers/STBReader.h"
+#ifdef  DGTAL_WITH_HDF5
 #include "DGtal/io/readers/HDF5Reader.h"
 #endif
-#ifdef WITH_MAGICK
-#include "DGtal/io/readers/MagickReader.h"
-#endif
-#ifdef WITH_ITK
+#ifdef  DGTAL_WITH_ITK
 #include "DGtal/io/readers/DicomReader.h"
 #include "DGtal/io/readers/ITKReader.h"
 #endif
@@ -272,20 +270,18 @@ namespace DGtal
             return RawReader< TContainer, TFunctor >::template importRaw<TValue>( filename, pt, aFunctor  );
           }
 
-#ifdef WITH_HDF5
+#ifdef  DGTAL_WITH_HDF5
         if ( extension == "h5" )
           return HDF5Reader<TContainer, TFunctor>::importHDF5_3D(filename, "UInt8Array3D", aFunctor);
 #endif
 
-#ifdef WITH_ITK
+#ifdef  DGTAL_WITH_ITK
         if ( extension == "dcm" )
           {
             return DicomReader<TContainer, TFunctor>::importDicom(filename, aFunctor);
           }
-          else if ( extension == "nii" || extension == "mha" ||
-                    extension == "mhd" || extension == "tiff" ||
-                    extension == "tif" )
-          {
+        else if (std::find(ITK_IO_IMAGE_EXT.begin(), ITK_IO_IMAGE_EXT.end(), extension) != ITK_IO_IMAGE_EXT.end() )
+           {
             return ITKReader<TContainer>::importITK( filename, aFunctor );
           }
 #endif
@@ -355,7 +351,7 @@ namespace DGtal
             return RawReader< TContainer, TFunctor >::importRaw32 ( filename, pt, aFunctor  );
           }
 
-#ifdef WITH_ITK
+#ifdef  DGTAL_WITH_ITK
         if ( extension == "dcm" )
           {
             return DicomReader<TContainer, TFunctor>::importDicom(filename, aFunctor);
@@ -404,7 +400,7 @@ namespace DGtal
     BOOST_CONCEPT_ASSERT((  concepts::CImage<TContainer> )) ;
 
     /**
-     * Import a volume image file.  For the special format h5 (you need to set WITH_HDF5 of cmake build),
+     * Import a volume image file.  For the special format h5 (you need to set  DGTAL_WITH_HDF5 of cmake build),
      *  the default parameter datasetName needs to be updated
      * according to the dimension if the image.
      *
@@ -420,8 +416,7 @@ namespace DGtal
 
     /**
      * Import an image file by specifying a color encoder functor
-     *  (used only for color image format ppm, ( gif, jpeg, ... if the
-     *  magick image lib is installed) .
+     *  (used only for color image format ppm, png, tga, bmp,jpeg) .
      *
      * @tparam TFunctor The type of the functor (should verify the concept CUnaryFunctor<TFunctor, TContainer::Value, DGtal::Color > ).
      * @param filename the image filename to be imported.
@@ -451,15 +446,10 @@ namespace DGtal
             typename TContainer::Point const pt (x,y);
             return RawReader< TContainer, TFunctor >::template importRaw<DGtal::Color>( filename, pt, aFunctor);
           }
-        else if ( extension == "gif" || extension == "jpg" || extension == "png" || extension == "jpeg" || extension == "bmp" )
+        else if ( extension == "gif" || extension == "jpg" || extension == "png" || extension == "jpeg" || extension == "bmp" || extension == "tga" )
           {
-#ifdef WITH_MAGICK
-            MagickReader<TContainer, TFunctor> reader;
-            return reader.importImage( filename, aFunctor );
-#else
-            trace.error() << "Extension " << extension<< " not yet implemented in DGtal but you can add Magick option to deal with this image type." << std::endl;
-            throw dgtalio;
-#endif
+            STBReader<TContainer, TFunctor> reader;
+            return reader.import( filename, aFunctor );
           }
 
         trace.error() << "Extension " << extension<< " in 2D, not yet implemented in DGtal GenericReader." << std::endl;
@@ -500,7 +490,7 @@ namespace DGtal
             return PGMReader<TContainer, TFunctor>::importPGM(filename, aFunctor);
           }
 
-#ifdef WITH_HDF5
+#ifdef  DGTAL_WITH_HDF5
         if (extension=="h5")
           return HDF5Reader<TContainer, TFunctor>::importHDF5(filename, "image8bit", aFunctor);
 #endif
@@ -522,7 +512,7 @@ namespace DGtal
     BOOST_CONCEPT_ASSERT((  concepts::CImage<TContainer> )) ;
 
     /**
-     * Import a volume image file.  For the special format h5 (you need to set WITH_HDF5 of cmake build),
+     * Import a volume image file.  For the special format h5 (you need to set  DGTAL_WITH_HDF5 of cmake build),
      *  the default parameter datasetName needs to be updated
      * according to the dimension if the image.
      *
@@ -538,8 +528,7 @@ namespace DGtal
 
     /**
      * Import an image file by specifying a color encoder functor
-     *  (used only for color image format ppm, ( gif, jpeg, ... if the
-     *  magick image lib is installed) .
+     *  (used only for color image format ppm, png, tga, bmp,jpeg) .
      *
      * @tparam TFunctor The type of the functor (should verify the concept CUnaryFunctor<TFunctor, TContainer::Value, DGtal::Color > ).
      * @param filename the image filename to be imported.
@@ -569,15 +558,10 @@ namespace DGtal
             typename TContainer::Point const pt (x,y);
             return RawReader< TContainer, TFunctor >::template importRaw<DGtal::Color>( filename, pt, aFunctor);
           }
-        else if ( extension == "gif" || extension == "jpg" || extension == "png" || extension == "jpeg" || extension == "bmp" )
+        else if ( extension == "tga" || extension == "jpg" || extension == "png" || extension == "jpeg" || extension == "bmp" )
           {
-#ifdef WITH_MAGICK
-            MagickReader<TContainer, TFunctor> reader;
-            return reader.importImage( filename, aFunctor );
-#else
-            trace.error() << "Extension " << extension<< " not yet implemented in DGtal but you can add Magick option to deal with this image type." << std::endl;
-            throw dgtalio;
-#endif
+            STBReader<TContainer, TFunctor> reader;
+            return reader.import( filename, aFunctor );
           }
 
         trace.error() << "Extension " << extension<< " not yet implemented in DGtal GenericReader." << std::endl;
@@ -617,7 +601,7 @@ namespace DGtal
             return PGMReader<TContainer, TFunctor>::importPGM(filename, aFunctor);
           }
 
-#ifdef WITH_HDF5
+#ifdef  DGTAL_WITH_HDF5
         if (extension=="h5")
           return HDF5Reader<TContainer, TFunctor>::importHDF5(filename, "image8bit", aFunctor);
 #endif

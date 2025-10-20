@@ -350,8 +350,8 @@ namespace DGtal
    * - the k-th Khalimsky coordinate of upperCell() is equal to:
    *    - `2*upper[k]+2` if the k-th dimension is closed,
    *    - `2*upper[k]+1` if the k-th dimension is open or periodic.
-   *    .
-   * .
+   *
+   * 
    * The special behavior for __periodic dimensions__ guarantees that each cell has unique
    * Khalimsky coordinates in this range.
    * It is useful to span the space and also for cell-based containers (see e.g. CubicalComplex).
@@ -486,7 +486,20 @@ namespace DGtal
 
     /// Default constructor.
     KhalimskySpaceND();
-
+    
+    /** @brief Constructor from upper and lower bounds for the maximal cells in
+     * this space.
+     *
+     * @param lower the lowest point in this space (digital coords)
+     * @param upper the upper point in this space (digital coords)
+     * @param isClosed 'true' if this space is closed and non-periodic in every dimension, 'false' if open.
+     *
+     * @see init()
+     */
+    KhalimskySpaceND( const Point & lower,
+		      const Point & upper,
+		      bool isClosed );
+    
     /** @brief Copy constructor.
      *
      * @param other the object to clone.
@@ -2018,6 +2031,24 @@ ose sign is positive).
      */
     SCell sIndirectIncident( const SCell & p, Dimension k ) const;
 
+    
+    
+    /** @brief For a given surfel ((n-1)-signed cell), returns its interior voxel
+     * (point in Z^d given by the direct incident n-cell to the given cell).
+     *
+     * @param c any signed pre-cell.
+     * @return the inner voxel.
+     */
+    Point interiorVoxel( const SCell & c ) const;
+    
+    /** @brief For a given surfel ((n-1)-signed cell), returns its exterior voxel
+     * (point in Z^d given by the indirect incident n-cell to the given cell).
+     *
+     * @param c any signed pre-cell.
+     * @return the outer voxel.
+     */
+    Point exteriorVoxel( const SCell & c ) const;
+    
     /// @}
 
     // ----------------------- Interface --------------------------------------

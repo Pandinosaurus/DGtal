@@ -110,7 +110,7 @@ namespace DGtal
     typedef std::pair< Face, Scalar >               WeightedFace;
     /// The type that defines a list/range of vertices (e.g. to define faces)
     typedef std::vector< Vertex >                   Vertices;
-    /// The type that defines a list/range of faces
+    /// The type that defines a list/range of edges
     typedef std::vector< Edge >                     Edges;
     typedef std::vector< WeightedEdge >             WeightedEdges;
     typedef std::vector< Face >                     Faces;
@@ -226,8 +226,16 @@ namespace DGtal
 
     /// Uses the positions of vertices to compute a normal vector to
     /// each face of the mesh. It computes the barycenter,
-    /// triangulates implicitly the face to build the normal vector from the average of implicit triangle normals.
+    /// triangulates implicitly the face to build the normal vector
+    /// from the average of implicit triangle normals.
     void computeFaceNormalsFromPositions();
+
+    /// Uses the positions of vertices to compute a normal vector to
+    /// the face \a f of the mesh. It computes the barycenter,
+    /// triangulates implicitly the face to build the normal vector
+    /// from the average of implicit triangle normals.
+    /// @param f any valid index of face.
+    void computeFaceNormalFromPositions( const Face f );
 
     /// Uses the normals associated with vertices to compute a normal
     /// vector to each face of the mesh. It simply averages the
@@ -324,9 +332,10 @@ namespace DGtal
     { return myNeighborVertices[ v ]; }
 
     /// @param e any edge
-    /// @return a const reference to the vector giving for edge \a e
-    /// its two vertices (as a pair (i,j), i<j).
-    const VertexPair& edgeVertices( Edge e ) const
+    /// @return a pair giving for edge \a e its two vertices (as a
+    /// pair (i,j), i<j).
+    /// @note if the edge is not valid, return {0,0}.
+    VertexPair edgeVertices( Edge e ) const
     { return myEdgeVertices[ e ]; }
     
     /// @param e any edge
@@ -375,9 +384,10 @@ namespace DGtal
     const std::vector< Vertices >& allNeighborVertices() const
     { return myNeighborVertices; }
 
-    /// @return a const reference to the vector giving for each edge
-    /// its two vertices (as a pair (i,j), i<j).
-    /// @note edges are sorted in increasing order.
+    /// @return a vector giving for each edge its two vertices (as a
+    /// pair (i,j), i<j).
+    /// @note Since 1.4, order is not significant (this is to allow
+    /// flip and modification in the surface mesh).
     const std::vector< VertexPair >& allEdgeVertices() const
     { return myEdgeVertices; }
     
@@ -436,6 +446,107 @@ namespace DGtal
     /// two left incident faces for instance.
     Edges computeNonManifoldEdges() const;
     
+    /// @return true if the boundary edges define a collection of
+    /// manifold 1d polygonal curves (at most 2 adjecent edges per vertex).
+    /// If checkClosed is set to true, we also check that all polygonal curves are closed.
+    ///
+    /// The method returns false if the surface mesh has no boundary.
+    ///
+    /// @param checkClosed if true, we check that each vertex has exactly two adejcent edges.
+    bool isBoundariesManifold( bool checkClosed = true ) const
+    {
+      // computes unordered list of boundary vertices
+      std::map<Vertex,Vertices> adjacent;
+      auto MBE = this->computeManifoldBoundaryEdges();
+      if ( MBE.size() == 0 ) return false;
+      
+      for (auto e : MBE)
+      {
+        auto ij = this->edgeVertices(e);
+        adjacent[ ij.first ].push_back( ij.second );
+        if ( adjacent[ ij.first ] .size() > 2 ) return false;
+        adjacent[ ij.second ].push_back( ij.first );
+        if ( adjacent[ ij.second ].size() > 2 )  return false;
+      }
+      //we may check if all curves are closed.
+      if ( checkClosed )
+        for ( const auto &adj : adjacent )
+          if ( adj.second.size() != 2 ) return false;
+      return true;
+    }
+    
+    /// Extract the boundary of a surface mesh as a collection of sequences
+    /// of vertices. The boundaries must be 1d manifold polygonal curves.
+    /// @pre the boundaries must be manifold.
+    ///
+    /// @return a vector of polygonal simple curves (vector of vertices).
+    std::vector<Vertices> computeManifoldBoundaryChains() const
+    {
+      std::vector<Vertices> boundaries;
+      Vertices boundary;
+      auto MBE = this->computeManifoldBoundaryEdges();
+      std::map<Vertex,bool> visited;
+      std::map<Vertex,Vertices> adjacent;
+      
+      ASSERT_MSG(MBE.size()>0,"The surface mesh must have boundary edges");
+      ASSERT_MSG(this->isBoundariesManifold(), "The surface mesh mush have manifold boundaries");
+      
+      //Coompute adjecency relationships
+      for (auto e : MBE)
+      {
+        auto ij = this->edgeVertices(e);
+        visited[ij.first] = false;
+        visited[ij.second] = false;
+        adjacent[ij.first].push_back(ij.second);
+        adjacent[ij.second].push_back(ij.first);
+      }
+      
+      auto boundary_it = visited.begin();
+      
+      while(boundary_it != visited.end() )
+      {
+        Vertex first = (*boundary_it).first;
+        visited[first] = true;
+        boundary.clear();
+        boundary.push_back(first);
+        
+        Vertex current = first;
+        size_t nb_iter = 0;
+        bool pushed=false;
+        
+        while ((!pushed) && (nb_iter < MBE.size()*2))
+        {
+          bool ok = false;
+          for (auto other : adjacent[current])
+            if (!visited[other])
+            {
+              boundary.push_back(other);
+              current = other;
+              visited[other] = true;
+              ok = true;
+              break;
+            }
+          if (!ok)
+          {
+            //all neighboors are visited
+            for (auto other : adjacent[current])
+              if (other == first)
+              {
+                boundaries.push_back(boundary);
+                pushed = true;
+                break;
+              }
+            //if first vertex isn't found then this chain is not
+            //homeomorphic to a circle, hence isn't added to boundaries
+          }
+          nb_iter++;
+        }
+        boundary_it = std::find_if(visited.begin(), visited.end(),
+                                   []
+                                   (std::pair<Vertex,bool> x){return !x.second;});
+      }
+      return boundaries;
+    }
     /// @}
     
     // ----------------------- Undirected simple graph services ----------------------
@@ -585,6 +696,17 @@ namespace DGtal
     /// @return the average of the length of edges.
     Scalar averageEdgeLength() const;
 
+    ///@return the Euclidean distance between any two vertices i and j.
+    ///@param i first vertex
+    ///@param j second vertex
+    Scalar distance(const Vertex i, const Vertex j) const
+    {
+      //unrolling for compiler optimization
+      const auto p=this->myPositions[ i ];
+      const auto q=this->myPositions[ j ];
+      return std::sqrt( (p[0]-q[0])*(p[0]-q[0]) + (p[1]-q[1])*(p[1]-q[1])+ (p[2]-q[2])*(p[2]-q[2]));
+    }
+    
     /// @param f any valid face index
     /// @return the average distance between the centroid of face \a f
     /// and its vertices.
@@ -631,15 +753,36 @@ namespace DGtal
     /// (in the range [0,1] where 0 is empty intersection and 1 is
     /// completely included).
     ///
-    /// @note For edges, the ratio is the length of the part of the
-    /// edge included in the ball and the total edge length. For
-    /// faces, the ratio is the @e approximated @e area of the face
-    /// part inside the ball and the face area. The approximation is
-    /// estimated by computing the distance of face vertices and face
-    /// barycenter to the ball center and by linear interpolation of
-    /// the results.
+    /// @note For faces, the ratio is the @e approximated @e area of
+    /// the face part inside the ball and the face area. The
+    /// approximation is estimated by computing the distance of face
+    /// vertices and face barycenter to the ball center and by linear
+    /// interpolation of the results.
     WeightedFaces
     computeFacesInclusionsInBall( Scalar r, Index f ) const;
+    
+    /// Given a ball of radius \a r centered on a point \a p belonging
+    /// to face \a f, return the faces having a non empty intersection
+    /// with this ball, each one weighted by its ratio of inclusion
+    /// (in the range [0,1] where 0 is empty intersection and 1 is
+    /// completely included).
+    ///
+    /// @param r the radius of the ball.
+    /// @param f the face where the ball is centered.
+    /// @param p the position on the face where the ball is centered.
+    ///
+    /// @return the range of faces having an non empty intersection
+    /// with this ball, each one weighted by its ratio of inclusion
+    /// (in the range [0,1] where 0 is empty intersection and 1 is
+    /// completely included).
+    ///
+    /// @note For faces, the ratio is the @e approximated @e area of
+    /// the face part inside the ball and the face area. The
+    /// approximation is estimated by computing the distance of face
+    /// vertices and face barycenter to the ball center and by linear
+    /// interpolation of the results.
+    WeightedFaces
+    computeFacesInclusionsInBall( Scalar r, Index f, RealPoint p ) const;
     
     /// Given a ball of radius \a r centered on the centroid of face
     /// \a f, return the vertices/edges/faces having an non empty
@@ -658,6 +801,25 @@ namespace DGtal
     /// @note a vertex is either included or not, so no weight is necessary.
     std::tuple< Vertices, WeightedEdges, WeightedFaces >
     computeCellsInclusionsInBall( Scalar r, Index f ) const;
+
+    /// Given a ball of radius \a r centered on a point \a p belonging
+    /// to face \a f, return the vertices/edges/faces having an non
+    /// empty intersection with this ball, each edge/face weighted by
+    /// its ratio of inclusion (in the range [0,1] where 0 is empty
+    /// intersection and 1 is completely included).
+    ///
+    /// @param r the radius of the ball.
+    /// @param f the face where the ball is centered.
+    /// @param p the position on the face where the ball is centered.
+    ///
+    /// @return the range of vertices/edges/faces having an non empty
+    /// intersection with this ball, each edge/face weighted by its
+    /// ratio of inclusion (in the range [0,1] where 0 is empty
+    /// intersection and 1 is completely included).
+    ///
+    /// @note a vertex is either included or not, so no weight is necessary.
+    std::tuple< Vertices, WeightedEdges, WeightedFaces >
+    computeCellsInclusionsInBall( Scalar r, Index f, RealPoint p ) const;
     
     /// Computes an approximation of the inclusion ratio of a given
     /// face \a f with a ball of radius \a r and center \a p.
@@ -701,6 +863,88 @@ namespace DGtal
     Scalar vertexInclusionRatio( RealPoint p, Scalar r, Index v ) const;
 
     /// @}
+
+    //---------------------------------------------------------------------------
+  public:
+    /// @name Mesh editing services
+    /// @{
+
+    /// An edge is (topologically) flippable iff: (1) it does not lie
+    /// on the boundary, (2) it is bordered by two triangles, one that
+    /// to its right, one to its left, (3) the two other vertices of
+    /// the quad are not already neighbors, (4) the edge is not
+    /// bordered by the same two triangles, in opposite orientation.
+    ///
+    /// @param e any edge.
+    /// @return 'true' if the edge \a e is topologically flippable.
+    ///
+    /// @note Time complexity is O(1).
+    bool isFlippable( const Edge e ) const;
+
+    /// @pre `isFlippable( e )` must be true.
+    /// @param e any edge.
+    /// @return the two other vertices of the quadrilateral around the edge \a e. 
+    VertexPair otherDiagonal( const Edge e ) const;
+    
+    /**
+       Flip the edge \a e. Be careful that after the flip, this edge
+       index determines another edge, which is the other diagonal of
+       the quadrilateral having \a e as its diagonal.
+      
+       \verbatim
+             l                   l
+            / \                 /|\
+           /   \               / | \
+          /     \             /  |  \
+         /   lf  \           /   |   \
+        /         \         /    |    \
+       i --- e --- j  ==>  i  lf e  rf j    if k < l otherwise rf and lf are swapped
+        \         /         \    |    /
+         \   rf  /           \   |   /
+          \     /             \  |  /
+           \   /               \ | /
+            \ /                 \|/
+             k                   k
+       \endverbatim
+      
+       @param e any valid edge.
+      
+       @param recompute_face_normals when 'true', recompute normals
+       of flipped faces with the positions of the vertices.
+      
+       @pre the edge must be flippable, `isFlippable( e ) == true`
+      
+       @post After the flip, the edge index \a e corresponds to the
+       index of the flipped edge (if you reflip it you get your
+       former configuration).
+      
+       @note Time complexity is O(log n), due to the updating of
+       surrounding edges information.
+      
+       @warning For performance reasons, The neighbor faces of each
+       face are not recomputed. One should call \ref computeNeighbors
+       to recompute them. However the neighbor vertices to each
+       vertex are recomputed.
+      
+       @warning Vertex normals are not recomputed, but face normals
+       may be recomputed if asked for. The face normals are then the
+       geometric normals of triangles.
+    */
+    void flip( const Edge e, bool recompute_face_normals = false );
+    
+    /// @}    
+
+    //---------------------------------------------------------------------------
+  public:
+    /// @name Look-up table computation services
+    /// @{
+    
+    /// Computes neighboring information.
+    void computeNeighbors();
+    /// Computes edge information.
+    void computeEdges();
+
+    /// @}
     
     // ----------------------- Interface --------------------------------------
   public:
@@ -735,6 +979,8 @@ namespace DGtal
     std::vector< Vertices >     myNeighborVertices;
     /// For each edge, its two vertices
     std::vector< VertexPair >   myEdgeVertices;
+    /// For each vertex pair, its edge index.
+    std::map< VertexPair,Edge > myVertexPairEdge;
     /// For each edge, its faces (one, two, or more if non manifold)
     std::vector< Faces >        myEdgeFaces;
     /// For each edge, its faces to its right  (zero if open, one, or more if
@@ -757,10 +1003,52 @@ namespace DGtal
     // ------------------------- Internals ------------------------------------
   protected:
 
-    /// Computes neighboring information.
-    void computeNeighbors();
-    /// Computes edge information.
-    void computeEdges();
+    /// Removes the index \a i from the vector \a v.
+    /// @param[inout] v a vector of indices
+    /// @param[in] i an index
+    void removeIndex( std::vector< Index >& v, Index i )
+    {
+      const std::size_t n = v.size();
+      for ( std::size_t j = 0; j < n; j++ )
+	if ( v[ j ] == i )
+	  {
+	    std::swap( v[ j ], v.back() );
+	    v.resize( n - 1 );
+	    return;
+	  }
+      trace.error() << "[SurfaceMesh::removeIndex] Index " << i
+		    << " is not in vector:";
+      for ( auto e : v ) std::cerr << " " << e;
+      std::cerr << std::endl;
+    }
+
+    /// Replaces the index \a i with the index \a ri in the vector \a v.
+    /// @param[inout] v a vector of indices
+    /// @param[in] i an index
+    /// @param[in] ri an index    
+    void replaceIndex( std::vector< Index >& v, Index i, Index ri )
+    {
+      const std::size_t n = v.size();
+      for ( std::size_t j = 0; j < n; j++ )
+	if ( v[ j ] == i )
+	  {
+	    v[ j ] = ri;
+	    return;
+	  }
+      trace.error() << "[SurfaceMesh::replaceIndex] Index " << i
+		    << " (subs=" << ri << ") is not in vector:";
+      for ( auto e : v ) std::cerr << " " << e;
+      std::cerr << std::endl;
+    }
+
+    /// Adds the index \a i to the vector \a v.
+    /// @param[inout] v a vector of indices
+    /// @param[in] i an index
+    void addIndex( std::vector< Index >& v, Index i )
+    {
+      v.push_back( i );
+    }
+    
 
     /// @return a random number between 0.0 and 1.0
     static Scalar rand01()

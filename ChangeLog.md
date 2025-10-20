@@ -1,4 +1,296 @@
-# DGtal 1.3 (beta)
+# DGtal 2.1.beta
+
+## Changes
+
+- *IO*
+  - Polyscope viewer upgraded from 2.4 to 2.5 (David Coeurjolly,  [#1796](https://github.com/DGtal-team/DGtal/pull/1796)). Reverting to 2.4  due to build issues (David Coeurjolly,  [#1797](https://github.com/DGtal-team/DGtal/pull/1797))
+
+- *Documentation*
+  - Refactoring of the volumetric examples in the Shortcuts (David Coeurjolly, [#1807](https://github.com/DGtal-team/DGtal/pull/1807))
+  - Removing the doxygen image includes for the latex target (David Coeurjolly, [#1811](https://github.com/DGtal-team/DGtal/pull/1811))
+
+## Bug fixes
+
+- *Arithmetics*
+  - Fix `testLightSternBrocot` issue on windows with the `rand()` function (Jacques-Olivier Lachaud, [#1801](https://github.com/DGtal-team/DGtal/pull/1801))
+
+- *Geometry*
+  - Fix issue [#1797](https://github.com/DGtal-team/DGtal/pull/1797), assertions raised in testCellGeometry and testDigitalConvexity because of improper digital space extent (Jacques-Olivier Lachaud, [#1801](https://github.com/DGtal-team/DGtal/pull/1801))
+
+- *Build*
+  - Version is now extracted from the `VERSION` file for CMake and Python builds (Bastien Doignies, [#1810](https://github.com/DGtal-team/DGtal/pull/1810))
+  - Replacing the global compilation flags when `DGTAL_WARNINGS_AS_ERRORS` is set, with per target `target_compile_options` to avoid errors on Boost warnings (David Coeurjolly,  [#1793](https://github.com/DGtal-team/DGtal/pull/1793))
+  - Fixing the `make install` command for boost (issue #1794) (Bastien Doignies, [#1793](https://github.com/DGtal-team/DGtal/pull/1793))
+  - Adding option not to install targets to avoid crashes when boost is fetched through multiple channels ([#1809](https://github.com/DGtal-team/DGtal/pull/1809))
+  - Cleaning up the Github Actions reuses (Bastien Doignies, [#1793](https://github.com/DGtal-team/DGtal/pull/1793))
+  - Add cache to github actions (Bastien Doignies, [#1805](https://github.com/DGtal-team/DGtal/pull/1805))
+
+- *Python*
+  - Build backend upgraded to scikit-build-core (Bastien Doignies, [#1804](https://github.com/DGtal-team/DGtal/pull/1804))
+  - New CI for pypi deployement with cibuildwheel (Bastien Doignies, [#1804](https://github.com/DGtal-team/DGtal/pull/1804))
+
+
+# DGtal 2.0
+
+## New features
+
+- *General*
+  - Library is now (almost) header only (Bastien Doignies, [#1757](https://github.com/DGtal-team/DGtal/pull/1757))
+  - Boost is no longer required when building DGtal (boost is now fetched using CPM at cmake step) (Bastien Doignies, David Coeurjolly,  [#1763](https://github.com/DGtal-team/DGtal/pull/1763))
+
+- *Base*
+  - Remove GMP dependency (Bastien Doignies, [#1769](https://github.com/DGtal-team/DGtal/pull/1769))
+  - New Boost BigInteger Backend (Bastien Doignies, [#1769](https://github.com/DGtal-team/DGtal/pull/1769))
+
+- *IO*  
+  - New Polyscope-based 3D viewer (Bastien Doignies, [#1775](https://github.com/DGtal-team/DGtal/pull/1775))
+  - Remove old QGLViewer and Qt dependency (Bastien Doignies, [#1775](https://github.com/DGtal-team/DGtal/pull/1775))
+  - Add reading material indices  (aka indicies to [MTL](https://fr.wikipedia.org/wiki/Material_Template_Library) entries) in SurfaceMeshReader::readOBJ
+    (Jacques-Olivier Lachaud, [#1788](https://github.com/DGtal-team/DGtal/pull/1788))
+    
+- *Python*
+  - New python bindings for Shortcuts and ShortcutsGeometry (Bastien Doignies, [#1782](https://github.com/DGtal-team/DGtal/pull/1782))
+
+- *Geometry*
+  - Patate upgraded to ponca library for point cloud processing (Bastien Doignies, [#1776](https://github.com/DGtal-team/DGtal/pull/1776))
+
+## Changes
+
+- *General*
+  - C++20 support and new minimal standard (Bastien Doignies, [#1757](https://github.com/DGtal-team/DGtal/pull/1757))
+  - Remove deprecated classes and functions (Bastien Doignies, [#1765](https://github.com/DGtal-team/DGtal/pull/1765))
+  
+- *Geometry*
+  - Add CNC computer to Shortcuts (Bastien Doignies, [#1781](https://github.com/DGtal-team/DGtal/pull/1781))
+  - Add VoronoiMap (and DistanceTransformation) to Shortcuts (Bastien, Doignies, [#1784](https://github.com/DGtal-team/DGtal/pull/1784))
+  - Add method to evaluate normal to `LocalEstimatorFromSurfelFunctorAdapter` from Surfel as a replacement for removed `LocalConvolutionNormalVectorEstimator` (Bastien DOIGNIES, [#1765](https://github.com/DGtal-team/DGtal/pull/1765))
+  - Add method to evaluate all normals to `LocalEstimatorFromSurfelFunctorAdapter` as a replacement for removed `LocalConvolutionNormalVectorEstimator` (Bastien DOIGNIES, [#1765](https://github.com/DGtal-team/DGtal/pull/1765))
+  - Add covering for segments and triangles in 3D (Jacques-Olivier Lachaud, [#1786](https://github.com/DGtal-team/DGtal/pull/1786))
+
+- *Build*
+  - Prefixing main cmake variables with `DGTAL_` (David Coeurjolly, [#1753](https://github.com/DGtal-team/DGtal/pull/1753), Bastien Doignies, [#1772](https://github.com/DGtal-team/DGtal/pull/1772)
+  - Add a cmake option to use the ITK EIGEN configuration to solve the issue [#347](https://github.com/DGtal-team/DGtalTools/issues/437) of DGTalTools. (Bertrand Kerautret, [#1759](https://github.com/DGtal-team/DGtal/pull/1759)
+  - Building tests does not build the benchmarks anymore (Bastien Doignies, [#1772](https://github.com/DGtal-team/DGtal/pull/1772)
+  - Add a cmake option to build benchmark (Bastien Doignies, [#1772](https://github.com/DGtal-team/DGtal/pull/1772)
+  - Fix compilation typo in tutorial-examples (shortcuts-geometry)  (Bertrand Kerautret, [#1787] (https://github.com/DGtal-team/DGtal/pull/1787)) 
+
+- *Documentation*
+  - Refactoring of the documentation structure (David Coeurjolly, [#1762](https://github.com/DGtal-team/DGtal/pull/1762))
+  - Doc complement in Display3D and back integration of examples viewer3D-8bis-2Dimages
+    and related Display3D adaptation to recover image position. (Bertrand Kerautret [1792](https://github.com/DGtal-team/DGtal/pull/1792))
+
+
+## Bug fixes
+
+- *General*
+  - Upgrade of ITK to version 5 and above (Bastien Doignies, [#1757](https://github.com/DGtal-team/DGtal/pull/1757))
+
+- *CMake*
+  - Updated to version 3.20 minimum (contemporary version of C++20's new minimal standard) (Bastien Doignies, [#1757](https://github.com/DGtal-team/DGtal/pull/1757))
+  - Updated export and install commands to more modern cmake (Bastien Doignies, [#1757](https://github.com/DGtal-team/DGtal/pull/1757))
+  - Dependencies of DGtal are now build as separate targets (Bastien Doignies, [#1757](https://github.com/DGtal-team/DGtal/pull/1757))
+  - Add a new command `make dgtal_benchmark` to run all benchmarks (Bastien Doignies, [#1772](https://github.com/DGtal-team/DGtal/pull/1772))
+  - Reusable jobs for Github actions [#1766](https://github.com/DGtal-team/DGtal/pull/1766)
+
+- *Geometry*
+  - Fix rational polytopes tests of digital-k-convexity and full convexity (Jacques-Olivier Lachaud, [#1790](https://github.com/DGtal-team/DGtal/pull/1790))
+	- In `Naive3DDSSComputer`, ensure that the last segment is maximal in 2D, so that the corresponding 3D segment results from the intersection of two maximal 2D segments. (Kacper Pluta, [#1774]((https://github.com/DGtal-team/DGtal/pull/1775))
+
+# DGtal 1.4.2
+
+## New features
+
+- *Geometry*
+  - Implementation of the plane-probing L-algorithm (Tristan Roussillon, [#1744](https://github.com/DGtal-team/DGtal/pull/1744))
+
+## Changes
+
+- *General*
+  - Upgrade of polyscope version in examples from 1.2.0 to 2.3.0 (David Coeurjolly, [#1743](https://github.com/DGtal-team/DGtal/pull/1743))
+  - Fixing cmake CGAL 6.0 breaking change. (David Coeurjolly, [#1745](https://github.com/DGtal-team/DGtal/pull/1745))
+  - Adding a new `DGTAL_REMOVE_UNINSTALL` cmake option to disable the `uninstall` target. (David Coeurjolly, [#1746](https://github.com/DGtal-team/DGtal/pull/1746)
+  - Using the `dcoeurjo/GeometryProcessing-cmake-recipes` openmp recipe to detect openmp (David Coeurjolly, [#1750](https://github.com/DGtal-team/DGtal/pull/1750))
+
+## Bug fixes
+
+- *Geometry*
+  - Bug fix in ArithmeticalDSSComputerOnSurfels (Tristan Roussillon, [#1742](https://github.com/DGtal-team/DGtal/pull/1742))
+
+- *Topology*
+  - Fixing images in the Cubical Complex documentation page (David Coeurjolly, [#1748](https://github.com/DGtal-team/DGtal/pull/1748)) 
+
+# DGtal 1.4.1
+
+## New features / critical changes
+
+- *Geometry*	
+  - Add P-convexity, another characterization of full convexity,
+    which is faster to compute (Jacques-Olivier Lachaud,
+    [#1736](https://github.com/DGtal-team/DGtal/pull/1736))
+
+## Changes
+
+- *General*
+  - Removing DGtal installation with `homebrew` on mac (the formula being deprecated) (David Coeurjolly,
+    [#1738](https://github.com/DGtal-team/DGtal/pull/1738))
+
+
+## Bug fixes
+- *General*
+  - Fixing typos int the cmake script (David Coeurjolly, [#1739](https://github.com/DGtal-team/DGtal/pull/1739))
+
+- *DEC*
+  - Minor update of the DEC package documentation (David Coeurjolly, [#1734](https://github.com/DGtal-team/DGtal/pull/1734))
+
+
+	
+# DGtal 1.4
+
+## New features / critical changes
+- *General*
+  - Major update: C++17 is now required for DGtal. (David Coeurjolly,
+    [#1682](https://github.com/DGtal-team/DGtal/pull/1682))
+  - Mandatory dependencies and some optional ones can be setup by
+    conan.io, especially on Windows, new `ENABLE_CONAN` cmake
+    option to activate this. (David Coeurjolly,
+    [#1689](https://github.com/DGtal-team/DGtal/pull/1689))
+  - Faster build using CPM for dependency download and ccache with the cmake `USE_CCACHE=YES`option 
+    (ccache must be installed). (David Coeurjolly, [#1696](https://github.com/DGtal-team/DGtal/pull/1696)) 
+  - Better documentation style using doxygen-awesome.css. (David Coeurjolly,
+    [#1697](https://github.com/DGtal-team/DGtal/pull/1697))
+
+- *Geometry*
+  - New implicit shape from point cloud using LibIGL Winding Numbers. (David Coeurjolly,
+    [#1697](https://github.com/DGtal-team/DGtal/pull/1697))
+
+## Changes
+- *General*
+  - Renaming AUTHORS→CONTRIBUTORS for HAL (David Coeurjolly,
+    [#1699](https://github.com/DGtal-team/DGtal/pull/1699))
+  - Python bindings and Pypi deploy are now handled by Github-Actions (Bastien Doignies,
+    [#1721](https://github.com/DGtal-team/DGtal/pull/1721))
+  - Add CMake option DGTAL_WRAP_PYTHON (Pablo Hernandez-Cerdan,
+    [#1700](https://github.com/DGtal-team/DGtal/pull/1700))
+  - Upgrade of the conan scripts (for windows build) to conan 2, removing the ENABLE_CONAN option 
+    (documentation update instead) (David Coeurjolly, 
+    [#1729](https://github.com/DGtal-team/DGtal/pull/1729))
+
+- *IO*
+  - New method to change the mode of the light position in Viewer3D (fixed to
+    camera or the scene) (Bertrand Kerautret, [#1683](https://github.com/DGtal-team/DGtal/pull/1683))
+  - Add a new method to store material information in obj file in MeshReader and MeshWriter.
+    (Bertrand Kerautret, [#1686](https://github.com/DGtal-team/DGtal/pull/1686))
+  - Fix duplicate symbols on Windows due to stb_image, see issue #1714 (David Coeurjolly,
+    [#1715](https://github.com/DGtal-team/DGtal/pull/1715))
+
+- *Shapes*
+  - Add flips to SurfaceMesh data structure (Jacques-Olivier Lachaud,
+    [#1702](https://github.com/DGtal-team/DGtal/pull/1702))
+  - Add method to remove isolated vertices in Mesh, improve obj
+    material reading from potential obsolete path. (Bertrand Kerautret,
+    [#1709](https://github.com/DGtal-team/DGtal/issues/1709))
+  - Update of the WindingNumberShape constructor to allow external computation of point areas
+    (David Coeurjolly, [#1719](https://github.com/DGtal-team/DGtal/issues/1719))
+  - The WindingNumberShape class can output the raw winding number values
+    (David Coeurjolly, [#1719](https://github.com/DGtal-team/DGtal/issues/1719))
+
+- *DEC*
+  - New helper functor to construct an embedder to correct the PolygonalCalculs
+    (projection onto estimated tangent planes) (David Coeurjolly,
+    [#1730](https://github.com/DGtal-team/DGtal/issues/17309))
+
+- *Geometry package*
+  - Add creation of polytopes from segments and triangles in
+    ConvexityHelper and 3-5xfaster full subconvexity tests for triangles
+    in DigitalConvexity (Jacques-Olivier Lachaud,
+    [#1717](https://github.com/DGtal-team/DGtal/pull/1717))
+
+- *Project*
+  - Add CMake option DGTAL_WRAP_PYTHON (Pablo Hernandez-Cerdan,
+    [#1700](https://github.com/DGtal-team/DGtal/pull/1700))
+
+- *Github*
+  - New `/builddoc` and `/fullbuild` commands on PR comments (David Coeurjolly,
+    [#1683](https://github.com/DGtal-team/DGtal/pull/1683))
+  - Continuous integration on windows is now performed by Github
+    Action instead of Appeveyor  (David Coeurjolly,
+    [#1689](https://github.com/DGtal-team/DGtal/pull/1689))
+
+
+## Bug fixes
+- *General*
+  - Missing `boost/next_prior.hpp` includes in ReverseIterator, Melkman and Convex
+    Hull files (David Coeurjolly, [#1716](https://github.com/DGtal-team/DGtal/pull/1716))
+  - Activate and fix CTest tests on windows system. (Bertrand Kerautret,
+    [#1706](https://github.com/DGtal-team/DGtal/pull/1706))
+  - For now, removing Cairo deps install on windows (6hours long build 
+    with conan in the windows debug mode). (David Coeurjolly, 
+    [#1705](https://github.com/DGtal-team/DGtal/pull/1705))
+  - Fix conan file upload issue and log message. (Bertrand Kerautret,
+    [#1704](https://github.com/DGtal-team/DGtal/pull/1704))
+  - Fix of couple of doxygen warnings that cause errors on Github Actions
+    CI bots. (David Coeurjolly, [#1672](https://github.com/DGtal-team/DGtal/pull/1672))
+  - Removing "WITH_BENCHMARK" option as Google Benchmark is already included when building
+    the unit tests. (David Coeurjolly, [#1674](https://github.com/DGtal-team/DGtal/pull/1674))
+  - Removing unnecessary includes to speed-up compilation (David Coeurjolly,
+    [#1680](https://github.com/DGtal-team/DGtal/pull/1680))
+  - Upgrading pybind11 to v2.9 or python binding (David Coeurjolly,
+    [#1685](https://github.com/DGtal-team/DGtal/pull/1685))
+  - Many warning fixed (due to c++17 upgrade. (David Coeurjolly,
+    [#1691](https://github.com/DGtal-team/DGtal/pull/1691))
+  - WITH_COVERAGE option removed. (David Coeurjolly,
+    [#1691](https://github.com/DGtal-team/DGtal/pull/1691))
+  - Cleanup of cmake targets when BUILD_TESTING is disabled (David Coeurjolly
+    [#1698](https://github.com/DGtal-team/DGtal/pull/1698))
+  - Cleanup of the cmake script for dependency discovery (David Coeurjolly,
+    [#1697](https://github.com/DGtal-team/DGtal/pull/1697))
+  - Cleaning up unnecessary ModuleSRC.cmake files (David Coeurjolly
+    [#1711](https://github.com/DGtal-team/DGtal/pull/1711))
+  - Fixing install path of CPM in the DGtalConfig.cmake.in (David Coeurjolly,
+    [#1713](https://github.com/DGtal-team/DGtal/pull/1713))
+  - DGTAL_LIBRARIES cmake flag now contains the Deps (David Coeurjolly,
+    [#1728](https://github.com/DGtal-team/DGtal/pull/1728))
+
+- *Topology package*
+  - Fix KhalimskySpaceND to get it work with BigInteger (Tristan Roussillon,
+    [#1681](https://github.com/DGtal-team/DGtal/pull/1681))
+
+- *Geometry package*
+  - Fix Issue #1676 in testStabbingCircleComputer (Tristan Roussillon,
+    [#1688](https://github.com/DGtal-team/DGtal/pull/1688)
+  - Fix BoundedLatticePolytopeCounter::countInterior method (Jacques-Olivier Lachaud,
+    [#1717](https://github.com/DGtal-team/DGtal/pull/1717))
+  - Fix const attribute that shouldn't be in FreemanChain (Colin Weill--Duflos,
+	  [#1723](https://github.com/DGtal-team/DGtal/pull/1723))
+  - Fix seg fault due to recent compilers in FrechetShortcut (Bertrand Kerautret, 
+     Isabelle Sivignon [#1726](https://github.com/DGtal-team/DGtal/pull/1726))
+  - Fix FrechetShortcut to enable the parameter error to be equal to 0 and add new 
+    tests in testFrechetShortcut (Isabelle Sivignon, [#1726](https://github.com/DGtal-team/DGtal/pull/1726))
+
+
+- *IO*
+  - Fix of the `getHSV` method in the `Color` class. (David Coeurjolly,
+    [#1674](https://github.com/DGtal-team/DGtal/pull/1674))
+  - Fix of `SurfaceMeshWriter::writeIsoLinesOBJ` 
+    (Jacques-Olivier Lachaud, [#1701](https://github.com/DGtal-team/DGtal/pull/1701))
+  - Fix of the `PointListReader::getPolygonsFromInputStream` (Xun Gong,
+    [#1708](https://github.com/DGtal-team/DGtal/pull/1708))
+
+- *Examples*
+  - Fix Issue #1675, add missing SymmetricConvexExpander.h file
+    (Jacques-Olivier Lachaud, [#1675](https://github.com/DGtal-team/DGtal/pull/1675))
+
+- *Shapes*
+  - Removing libIGL warnings in WindingNumber classes (David Coeurjolly,
+    [#1722](https://github.com/DGtal-team/DGtal/pull/1722))
+
+- *DEC*
+  - Fix an issue with the Geodesic in Heat Poisson solver (David Coeurjolly,
+    [#1712](https://github.com/DGtal-team/DGtal/pull/1712))
+   - Removing unnecessary unt-test in testPolygonalCalculus (David Coeurjolly,
+    [#1724](https://github.com/DGtal-team/DGtal/pull/1724))
+
+# DGtal 1.3
 
 ## New features / critical changes
 
@@ -8,21 +300,117 @@
     [#1580](https://github.com/DGtal-team/DGtal/pull/1580))
   - Continuous integration does not use Travis anymore but Github
     Actions. (David Coeurjolly, [#1591](https://github.com/DGtal-team/DGtal/pull/1591))
+  - Examples are not built anymore by default (BUILD_EXAMPLES now set to OFF by default).
+    (David Coeurjolly, [#1630](https://github.com/DGtal-team/DGtal/pull/1630))
+
+- *Geometry package*
+  - Improve lattice polytope count operations and provide many new
+    services related to full convexity, like computing the (relative
+    or not) fully convex envelope, and building digital
+    polyhedra. (Jacques-Olivier Lachaud, [#1656](https://github.com/DGtal-team/DGtal/pull/1656))
+  - Add curvature measures computation on 3D surface mesh:
+    implements Normal Cycle, face-constant Corrected Normal Current
+    and vertex-interpolated Corrected Normal Current.
+    (Jacques-Olivier Lachaud,[#1617](https://github.com/DGtal-team/DGtal/pull/1617))
+  - Completes the digital convexity module with new functions
+    related to full convexity: check of full convexity for arbitrary
+    digital sets in nD, and helper classes for using full convexity in
+    practice (local geometric analysis, tangency and shortest paths)
+    (Jacques-Olivier Lachaud,[#1594](https://github.com/DGtal-team/DGtal/pull/1594))
+  - New VoronoiMapComplete class to store the full Voronoi map (with
+    all co-cycling sites (Robin Lamy, David Coeurjolly, Isabelle
+    Sivignon [#1605](https://github.com/DGtal-team/DGtal/pull/1605))
+
+- *DEC*
+  - New discrete differential operators on polygonal meshes have been
+    added. They can be used to process generic polygonal meshes (with
+    non-planar, non-convex faces) or digital surfaces. (David
+    Coeurjolly, [#1603](https://github.com/DGtal-team/DGtal/pull/1603)
+  - New class to compute geodesics on polygonal surfaces using the
+    Geodesics in Heat approach and the new differential operators on
+    polygonal surfaces (digital surfaces, or any PolygonalMesh instance) (David
+    Coeurjolly, [#1603](https://github.com/DGtal-team/DGtal/pull/1603)
+    - Updates to PolygonalCalculus: changing sign convention, fix some Eigen
+      problems, add Dirichlet boundary conditions, update discrete
+      differential calculus examples (Jacques-Olivier
+      Lachaud, [#1643](https://github.com/DGtal-team/DGtal/pull/1643))
+    - Updates to PolygonalCalculus: adding vector field operators (mainly covariant
+      gradient and covariant projection as well as Connection-Laplacian). Also adding two
+      more examples: harmonic parametrization and vectors in heat method. (Baptiste Genest, David
+      Coeurjolly, [#1646](https://github.com/DGtal-team/DGtal/pull/1646))
+
+- *Mathematical Package*
+  - Add Lagrange polynomials and Lagrange interpolation
+    (Jacques-Olivier Lachaud, [#1594](https://github.com/DGtal-team/DGtal/pull/1594))
+
+- *Topology*
+  - New helper methods to retrieve the interior/exterior voxel of a given
+    surfel (signed cell of a Khalimksy space). (David Coeurjolly,
+    [#1631](https://github.com/DGtal-team/DGtal/pull/1631))
+
+- *I/O*
+  - Imagemagick dependency and related classes. Image file format (png, jpg, tga, bmp, gif)
+    are now included in the DGtal core using `stb_image.h` and `stb_image_write.h`.
+   (David Coeurjolly, [#1648](https://github.com/DGtal-team/DGtal/pull/1648))
 
 ## Changes
 
+- *Image*
+  - Bugfix in the SpaceND and HyperRectDomain classes to allow very large extent (e.g. >$1024^3$)
+    (David Coeurjolly, [#1636](https://github.com/DGtal-team/DGtal/pull/1636))
+  - Improved ITK image selection in ImageSelector and add ITK xx.gz an other
+    format support. New option to keep set domain or to compute current bounding
+    box of elements of the set in ImageFromSet.
+    (Bertrand Kerautret, [#1633](https://github.com/DGtal-team/DGtal/pull/1633))
+  - Improved MeshReader for .off format in order to take into account more
+    comments and other header code used in CGAL.
+    (Bertrand Kerautret, [#1653](https://github.com/DGtal-team/DGtal/pull/1653) and
+    [#1654](https://github.com/DGtal-team/DGtal/pull/1654))
+
 - *IO*
-  - Fix purple color.  (Bertrand Kerautret and Phuc Ngo
-    [#1579](https://github.com/DGtal-team/DGtal/pull/1579))
+  - Add Obj format in MeshReader including colors and fixing obj format read
+    with relative face position.
+    (Bertrand Kerautret, [#1584](https://github.com/DGtal-team/DGtal/pull/1584))
   - Move static private HSVtoRGB and RGBtoHSV functions in Color class (public) and
     new setters/getters from/to HSV (Python binding updated)
     (Bertrand Kerautret, Phuc Ngo and David Coeurjolly
     [#1593](https://github.com/DGtal-team/DGtal/pull/1593))
 
+- *Geometry*
+  - Small fix for shortest paths computation, which could sometimes
+    output several times the same node. Add tests and examples.
+    (Jacques-Olivier Lachaud, [#1644](https://github.com/DGtal-team/DGtal/pull/1644))
+  - First and second curvature directions were inverted in the `IIPrincipalCurvaturesAndDirectionsFunctor`,
+    fixed now. (David Coeurjolly, [#1657](https://github.com/DGtal-team/DGtal/pull/1657))
+  - Renaming `getVoronoiVector` to `getVoronoiSite` in the DistanceTransformation class.
+    (David Coeurjolly, [#1660](https://github.com/DGtal-team/DGtal/pull/1660))
+
+- *Kernel*
+  - New constructor in Point2DEmbedderIn3D to explicitly orient the image plane and
+    new shift method to avoid recomputing orientation plane.
+    (Bertrand Kerautret [#1619](https://github.com/DGtal-team/DGtal/pull/1619))
+
 - *Build*
+  - New cmake targets to collect cmake, doxygen and markdown files (David Coeurjolly,
+    [#1609](https://github.com/DGtal-team/DGtal/pull/1609))
+  - Continuous integration does not use Travis anymore but Github
+    Actions. (David Coeurjolly, [#1591](https://github.com/DGtal-team/DGtal/pull/1591))
   - New cmake option (DGTAL_RANDOMIZED_TESTING_THRESHOLD) to set the
     (approximated) % of unit-tests to build and run for randomized
     testing (David Coeurjolly [#1588](https://github.com/DGtal-team/DGtal/pull/1588))
+  - Fix missing whitelist for the unit-tests in relation to
+    PR [#1591](https://github.com/DGtal-team/DGtal/pull/1591))
+    (Bertrand Kerautret [#1595](https://github.com/DGtal-team/DGtal/pull/1595))
+  - Fix cmake related ITK usage in other projects (issue #1612).
+    (Bertrand Kerautret and Pablo Hernandez-Cerdan [#1613](https://github.com/DGtal-team/DGtal/pull/1613))
+  - Adding ITK in Github Actions CI on linux distribution.
+    (Bertrand Kerautret [#1615](https://github.com/DGtal-team/DGtal/pull/1615))
+  - New variable in the Github Action script to disable some tests (not working in the bots)
+    (David Coeurjolly, [#1635](https://github.com/DGtal-team/DGtal/pull/1635))
+  - Google benchmark is now fetched when building the unit tests (using Fetch_Content)
+    (David Coeurjolly, [#1651](https://github.com/DGtal-team/DGtal/pull/1651))
+  - Add new cmake option to avoid linking errors related to STB image library
+    (like LNK2005 in MSVC). (Bertrand Kerautret, [#1666](https://github.com/DGtal-team/DGtal/pull/1666))
 
 ## Bug fixes
 
@@ -36,7 +424,63 @@
   - Fix cmake IN_LIST use policy. (Bertrand Kerautret,
     [#1592](https://github.com/DGtal-team/DGtal/pull/1592))
   - Adding a explicit list of tests to exclude from Github Actions
-    (David Coeurjolly, [#1596](https://github.com/DGtal-team/DGtal/pull/1596)
+    (David Coeurjolly, [#1596](https://github.com/DGtal-team/DGtal/pull/1596))
+  - Fixing bugs in the exclude list for CI
+    (David Coeurjolly, [#1602](https://github.com/DGtal-team/DGtal/pull/1602))
+  - Reactivating Github Actions bots
+    (David Coeurjolly, [#1628](https://github.com/DGtal-team/DGtal/pull/1628))
+  - OpenMP fix in DGtalConfig on macOS M1 (David Coeurjolly,
+    [#1641](https://github.com/DGtal-team/DGtal/pull/1641))
+  - New doxygen settings to reduce diagram generation (David Coeurjolly,
+    [#1663](https://github.com/DGtal-team/DGtal/pull/1663))
+
+- *Examples*
+  - We can now have examples using [polyscope](https://polyscope.run)
+    as viewer (`BUILD_POLYSCOPE_EXAMPLES` cmake variable). (David
+    Coeurjolly,
+    [#1603](https://github.com/DGtal-team/DGtal/pull/1603))
+
+- *IO*
+  - Faster export of OBJ files. (David Coeurjolly, [#1608]((https://github.com/DGtal-team/DGtal/pull/1608))
+  - Fixing bugs in writing Longvol from GenericWriter and tests.
+    (Bertrand Kerautret, [#1610](https://github.com/DGtal-team/DGtal/pull/1610)
+  - Fix compilation issue in MeshReader compilation.
+    (Bertrand Kerautret, [#1611](https://github.com/DGtal-team/DGtal/pull/1611)
+  - Minor fixes in VolReader and LongVolReader to be able to load large vol files.
+    (David Coeurjolly, [#1637](https://github.com/DGtal-team/DGtal/pull/1637))
+  - Fix LongVolReader that fails to read large values. It was why testLongvol and
+    testCompressedVolWriter were failing on some configurations.
+    (Roland Denis, [#1638](https://github.com/DGtal-team/DGtal/pull/1638))
+  - Fix missing `#include<map>` in MeshReaeder (Jeremy Fix, [#1649](https://github.com/DGtal-team/DGtal/pull/1649))
+  - Fix purple color. (Bertrand Kerautret and Phuc Ngo [#1579](https://github.com/DGtal-team/DGtal/pull/1579))
+
+- *Geometry package*
+  - The following changes have been made to fix a bug in `examplePlaneProbingSurfaceLocalEstimator`:
+    - in `PlaneProbingDigitalSurfaceLocalEstimator`, the method `probingFrameWithPreEstimation` now
+      returns a pair bool-frame instead of just a frame, in order to tell whether the frame will lead
+      to a valid initialization or not. The method `eval` now uses this boolean value and returns the
+      trivial normal vector if it has been set to 'False'.
+    - in `PlaneProbingParallelepipedEstimator`: `isValid` does not call the `isValid` method of the
+     delegate, but only checks the relevant parts (which have been pushed in to separate methods).
+     (Tristan Roussillon, [#1607](https://github.com/DGtal-team/DGtal/pull/1607))
+  - Fixing issue with the automatic deploy of the "nightly" documentation.
+    (David Coeurjolly, [#1620](https://github.com/DGtal-team/DGtal/pull/1620))
+  - Fix issue on computeHullThickness by adding angle tolerance to detect co-linearity vectors.
+    (Bertrand Kerautret, [#1647](https://github.com/DGtal-team/DGtal/pull/1647))
+
+- *DEC*
+  - More DEC examples can be built without QGLViewer (they didn't need it).
+    (David Coeurjolly, [#1642](https://github.com/DGtal-team/DGtal/pull/1642))
+  - Improving PolygonalCalculus and VectorHeatMethod for vector field processing on non-manifold surfaces.
+    (David Coeurjolly, [#1659](https://github.com/DGtal-team/DGtal/pull/1659))
+
+- *graph*
+  - Fix warning related to copy assignment in class DistanceBreadthFirstVisitor
+    (Jacques-Olivier Lachaud, [#1662](https://github.com/DGtal-team/DGtal/pull/1662))
+
+- *Shapes package*
+  - fix slow remove of isolated vertices in Mesh.
+    (Bertrand Kerautret, [#1718](https://github.com/DGtal-team/DGtal/pull/1718))
 
 # DGtal 1.2
 
@@ -129,7 +573,7 @@
     (Jocelyn Meyron, [#1553](https://github.com/DGtal-team/DGtal/pull/1553))
   - Fix issue
     [#1566](https://github.com/DGtal-team/DGtal/issues/1566): do not
-    compile example checkLatticeBallQuickHull if WITH_GMP is not set
+    compile example checkLatticeBallQuickHull if DGTAL_WITH_GMP is not set
     (Jacques-Olivier Lachaud,[#1567](https://github.com/DGtal-team/DGtal/pull/1567))
   - Fix AppVeyor issue on PlaneProbingParallelepipedEstimator and PlaneProbingRNeighborhood
     (Bertrand Kerautret, [#1568](https://github.com/DGtal-team/DGtal/pull/1568))

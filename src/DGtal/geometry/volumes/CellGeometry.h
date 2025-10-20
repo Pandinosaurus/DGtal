@@ -84,11 +84,7 @@ namespace DGtal
     typedef typename KSpace::Cell           Cell;
     typedef typename KSpace::Space          Space;
     typedef typename KSpace::Size           Size;
-#ifdef WITH_BIGINTEGER
     typedef DGtal::BigInteger               BigInteger;
-#else
-    typedef DGtal::int64_t                  BigInteger;
-#endif
     typedef DGtal::BoundedLatticePolytope< Space >  Polytope;
     typedef DGtal::BoundedLatticePolytope< Space >  LatticePolytope;
     typedef DGtal::BoundedRationalPolytope< Space > RationalPolytope;
@@ -158,6 +154,31 @@ namespace DGtal
     /// @name Cells services
     /// @{
 
+    /// Updates the cell cover with the cells touching a point \a p.
+    /// @param p any point
+    void addCellsTouchingPoint( const Point& p );
+
+    /// Updates the cell cover with the cells touching a pointel \a pointel.
+    /// @param pointel any pointel
+    void addCellsTouchingPointel( const Cell& pointel );
+
+    /// Updates the cell cover with the cells whose boundary covers
+    /// cell \a c (so \a c itself and its up-incident cells).
+    ///
+    /// @param c any any cell
+    void addCellsTouchingCell( const Cell& c );
+
+    /// Given two points \a a and \a b, updates the cell cover with
+    /// all the cells intersected by the Euclidean straight segment
+    /// from \a a to \a b.
+    ///
+    /// @param a any point
+    /// @param b any point
+    ///
+    /// @note Three times faster than building a (degenerated) lattice
+    /// polytope and then calling addCellsTouchingPolytope.
+    void addCellsTouchingSegment( const Point& a, const Point& b );
+    
     /// Updates the cell cover with the cells touching a range of
     /// digital points [itB, itE).
     template <typename PointIterator>
@@ -217,6 +238,10 @@ namespace DGtal
     /// @return the highest dimension for which cells are stored in this object.
     Dimension maxCellDim() const;
 
+    /// @param k any non negative integer
+    /// @return the vector of k-cells, represented as points with Khalimsky coordinates.
+    std::vector< Point > getKPoints( const Dimension k ) const;
+    
     /// @}
 
     // ----------------------- Cell services ------------------------------
@@ -265,6 +290,12 @@ namespace DGtal
     /// Given a rational \a polytope, such that `polytope.canBeSummed()==true`,
     /// return the \a i-kpoints that intersect it.
     ///
+    /// @note The rational polytope is dilated to a denominator 1 so
+    /// that the cells/k-points have a meaning.
+    ///
+    /// @warning Do not use when the polytope's denominator is too big,
+    /// otherwise the returned set can be huge.
+    ///
     /// @param polytope any rational polytope such that `polytope.canBeSummed() == true`
     /// @param i any integer between 0 and KSpace::dimension
     /// @return the \a i-kpoints that intersect this polytope.
@@ -291,6 +322,12 @@ namespace DGtal
 
     /// Given a rational \a polytope, such that `polytope.canBeSummed()==true`,
     /// return the \a i-cells that intersect it.
+    ///
+    /// @note The rational polytope is dilated to a denominator 1 so
+    /// that the cells/k-points have a meaning.
+    ///
+    /// @warning Do not use when the polytope's denominator is too big,
+    /// otherwise the returned set can be huge.
     ///
     /// @param polytope any rational polytope such that `polytope.canBeSummed() == true`
     /// @param i any integer between 0 and KSpace::dimension

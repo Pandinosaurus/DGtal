@@ -36,7 +36,6 @@
 #include "DGtal/kernel/sets/DigitalSetSelector.h"
 #include "DGtal/kernel/sets/DigitalSetConverter.h"
 #include "DGtal/topology/MetricAdjacency.h"
-#include "DGtal/topology/DomainMetricAdjacency.h"
 #include "DGtal/topology/DomainAdjacency.h"
 #include "DGtal/topology/DigitalTopology.h"
 #include "DGtal/topology/Object.h"
@@ -209,7 +208,7 @@ using namespace DGtal::Z2i;
 bool testLayers()
 {
 
-  GradientColorMap<int> cmap_grad( 0, 30 );
+  GradientColorMap<size_t> cmap_grad( 0, 30 );
   cmap_grad.addColor( Color( 128, 128, 255 ) );
   cmap_grad.addColor( Color( 255, 255, 128 ) );
   cmap_grad.addColor( Color( 128, 255, 128 ) );
@@ -270,8 +269,7 @@ bool testLayers()
       ++it )
   std::cout << " " << *it;
       board << CustomStyle( expander.layer().className(), 
-          new CustomFillColor
-          ( cmap_grad( expander.distance() ) ) )
+          new CustomFillColor( cmap_grad( expander.distance() ) ) )
       << expander.layer();
       
       expander.nextLayer();

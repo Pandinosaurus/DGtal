@@ -73,8 +73,8 @@ namespace DGtal
    *
    * Given a domain and a point predicate, an instance returns, for
    * each point in the domain, the closest point for which the
-   * predicate if false. Following Computational Geometry
-   * terminoliogy, points for which the predicate is false are "sites"
+   * predicate is false. Following Computational Geometry
+   * terminology, points for which the predicate is false are "sites"
    * for the Voronoi map construction. If a point is equi-distant to
    * two sites (e.g. if the digital point belong to a Voronoi cell
    * boundary in the Euclidean space), this Voronoi map construction
@@ -97,7 +97,7 @@ namespace DGtal
    * l_2@f$ metric, the overall computation is in @f$ O(d.n^d)@f$,
    * which is optimal.
    *
-   * If DGtal has been built with OpenMP support (WITH_OPENMP flag set
+   * If DGtal has been built with OpenMP support (DGTAL_WITH_OPENMP flag set
    * to "true"), the computation is done in parallel (multithreaded)
    * in an optimal way: on @a p processors, expected runtime is in
    * @f$ O(h.d.n^d / p)@f$.

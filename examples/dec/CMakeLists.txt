@@ -1,11 +1,8 @@
-if (WITH_CAIRO AND WITH_EIGEN AND WITH_QGLVIEWER)
+if (DGTAL_WITH_CAIRO AND DGTAL_WITH_POLYSCOPE_VIEWER)
 
     set(DGTAL_EXAMPLES_SRC_DEC
         exampleDECSurface
-        exampleDiscreteExteriorCalculusUsage
         exampleDiscreteExteriorCalculusSolve
-        exampleDiscreteExteriorCalculusChladni
-        exampleHeatLaplace
         )
 
     foreach(FILE ${DGTAL_EXAMPLES_SRC_DEC})
@@ -14,13 +11,14 @@ if (WITH_CAIRO AND WITH_EIGEN AND WITH_QGLVIEWER)
 
 endif()
 
-if (WITH_EIGEN)
-    set(DGTAL_EXAMPLES_SRC2_DEC
+set(DGTAL_EXAMPLES_SRC2_DEC
         examplePropagation
         exampleSurfaceATNormals
+        exampleHeatLaplace
+        exampleDiscreteExteriorCalculusChladni
+        exampleDiscreteExteriorCalculusUsage
         )
 
-    foreach(FILE ${DGTAL_EXAMPLES_SRC2_DEC})
+foreach(FILE ${DGTAL_EXAMPLES_SRC2_DEC})
      DGtal_add_example(${FILE})
-    endforeach()
-endif()
+endforeach()

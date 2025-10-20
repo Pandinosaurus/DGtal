@@ -443,7 +443,7 @@ namespace DGtal
     /// @note all 2-cells have the same weight for the data term.
     void setUp( double a, double l )
     {
-      const Dimension N = g2.size();
+      const Dimension N = (Dimension)g2.size();
       alpha     = a;
       lambda    = l;
       alpha_Id2 = alpha * ptrCalculus->template identity<2, PRIMAL>();
@@ -606,6 +606,8 @@ namespace DGtal
 			  double n_oo_max = 1e-4,
 			  unsigned int iter_max = 10 )
     {
+      (void)n_oo_max;//paramerter not used
+
       bool ok = true;
       if ( verbose >= 1 ) {
 	std::ostringstream sstr;
@@ -619,7 +621,6 @@ namespace DGtal
 	    trace.info() << "---------- Iteration "
 			 << i << "/" << iter_max << " ---------------" << std::endl;
 	  solveOneAlternateStep( );
-	  auto norms_v = checkV0();
 	  auto diffs_v = diffV0();
 	  if ( verbose >= 1 ) {
 	    trace.info() << "Variation |v^k+1 - v^k|_oo = " << std::get<0>( diffs_v )
@@ -902,7 +903,7 @@ namespace DGtal
     void updateSmallestEpsilonMap( const double threshold = .5 )
     {
       const KSpace& K = ptrCalculus->myKSpace;
-      for ( const SCell surfel : ptrCalculus->template getIndexedSCells<2, PRIMAL>() )
+      for ( const SCell& surfel : ptrCalculus->template getIndexedSCells<2, PRIMAL>() )
         {
           const Cell face            = K.unsigns( surfel );
           const Dimension    k1      = * K.uDirs( face );

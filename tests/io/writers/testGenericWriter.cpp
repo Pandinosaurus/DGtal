@@ -54,6 +54,7 @@ bool testGenericWriter()
   unsigned int nb = 0;
   typedef DGtal::ImageContainerBySTLVector<DGtal::Z3i::Domain, unsigned char > Image3D;
   typedef DGtal::ImageContainerBySTLVector<DGtal::Z3i::Domain, unsigned int > Image3D32bits;
+  typedef DGtal::ImageContainerBySTLVector<DGtal::Z3i::Domain, DGtal::uint64_t > Image3D64bits;
   typedef DGtal::ImageContainerBySTLVector<DGtal::Z2i::Domain,  unsigned char > Image2D;
   typedef DGtal::ImageContainerBySTLVector<DGtal::Z2i::Domain,  unsigned int > Image2D32bits;
   typedef DGtal::ImageContainerBySTLVector<DGtal::Z2i::Domain,  DGtal::Color > Image2DColor;
@@ -63,6 +64,14 @@ bool testGenericWriter()
     for(unsigned int j =0; j< 5; j++){
       for(unsigned int k =0; k< 5; k++){
         an32bitsImage3D.setValue(DGtal::Z3i::Point(k,j,i), 250000*i*j*k);
+      }
+    }
+  }
+  Image3D64bits an64bitsImage3D (DGtal::Z3i::Domain(DGtal::Z3i::Point(0,0,0),  DGtal::Z3i::Point(4,4,4)));
+  for(unsigned int i =0; i< 5; i++){
+    for(unsigned int j =0; j< 5; j++){
+      for(unsigned int k =0; k< 5; k++){
+        an64bitsImage3D.setValue(DGtal::Z3i::Point(k,j,i), 250000*i*j*k);
       }
     }
   }
@@ -93,18 +102,20 @@ bool testGenericWriter()
   trace.info() <<"[done]"  << std::endl;
   
   bool okh5 = true;
-  bool okh5bis = true;
-#ifdef WITH_HDF5
+#ifdef  DGTAL_WITH_HDF5
   trace.info() << "Testing writing HDF5 3D ... ";
   okh5 = anImportedImage1 >> "testGenericWriter.h5";
   trace.info() <<"[done]"  << std::endl;
   trace.info() << "Testing writing HDF5 3D (bis) ... ";  
-  okh5bis = DGtal::GenericWriter<Image3D>::exportFile("testGenericWriter_bis.h5", anImportedImage1, "/UInt8Array3D");
+  okh5 = okh5 && DGtal::GenericWriter<Image3D>::exportFile("testGenericWriter_bis.h5", anImportedImage1, "/UInt8Array3D");
   trace.info() <<"[done]"  << std::endl;
 #endif
   
   trace.info() << "Testing writing vol ... ";  
   bool ok2 = anImportedImage1 >> "testGenericWriter.vol";
+  trace.info() <<"[done]"  << std::endl;
+  trace.info() << "Testing writing longvol ... ";  
+  bool ok2bis = an64bitsImage3D >> "testGenericWriter.longvol";
   trace.info() <<"[done]"  << std::endl;
   trace.info() << "Testing writing raw ... ";  
   bool ok3 = anImportedImage1 >>"testGenericWriter.raw";
@@ -112,6 +123,20 @@ bool testGenericWriter()
   trace.info() << "Testing writing raw (bis) ... ";  
   bool ok3bis = DGtal::GenericWriter<Image3D>::exportFile( "testGenericWriter.raw", anImportedImage1);
   trace.info() <<"[done]"  << std::endl;
+  bool okITK= true;
+#ifdef  DGTAL_WITH_ITK  
+  for (auto ext: ITK_IO_IMAGE_EXT){
+    trace.info() << "Testing writing ITK (" << ext << ") ... ";  
+    if( ext != std::string("gz") )
+    {
+      okITK &= anImportedImage1 >> (std::string("testGenericWriter.") + ext);
+    }
+    trace.info() <<"[done]"  << std::endl;
+  }
+  trace.info() << "Testing writing ITK (.nii.gz) ... ";  
+  okITK &= anImportedImage1 >> "testGenericWriter.nii.gz";
+  trace.info() <<"[done]"  << std::endl;
+#endif  
 
   std::string filenameImage2 = testPath + "samples/contourS.pgm";    
 
@@ -123,20 +148,14 @@ bool testGenericWriter()
   trace.info() <<"[done]"  << std::endl;
   trace.info() << "Testing writing raw ... ";  
   bool ok5 = anImportedImage2 >> "testGenericWriter.raw";
-  trace.info() <<"[done]"  << std::endl;
   bool ok6 = DGtal::GenericWriter<Image3D32bits>::exportFile( "testGenericWriter32bits3D.raw", an32bitsImage3D);
-  trace.info() <<"[done]"  << std::endl;
   bool ok7 = DGtal::GenericWriter<Image2D32bits>::exportFile( "testGenericWriter32bits2D.raw", an32bitsImage2D);
   trace.info() <<"[done]"  << std::endl;
+  trace.info() << "Testing writing color image writer ... ";  
   bool ok8 = DGtal::GenericWriter<Image2DColor>::exportFile( "testGenericWriterColorImage.ppm", anColorImage2D);
+  ok8 = ok8 &&  DGtal::GenericWriter<Image2DColor>::exportFile( "testGenericWriterColorImage.png", anColorImage2D);
   trace.info() <<"[done]"  << std::endl;
-#ifdef WITH_MAGICK
-  bool ok9 = DGtal::GenericWriter<Image2DColor>::exportFile( "testGenericWriterColorImage.png", anColorImage2D);
-#else
-  bool ok9 = true;
-#endif  
-
-  nbok += ((ok1 && okh5 && okh5bis && ok2 && ok3 && ok3bis && ok4 && ok5 && ok6 && ok7 && ok8 && ok9) ? 1 : 0); 
+  nbok += ((ok1 && okh5 && ok2 & ok2bis && ok3 && ok3bis && ok4 && ok5 && ok6 && ok7 && ok8 && okITK) ? 1 : 0); 
   nb++;
   trace.info() << "(" << nbok << "/" << nb << ") "
 	       << "true == true" << std::endl;

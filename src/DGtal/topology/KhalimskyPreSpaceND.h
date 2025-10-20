@@ -8,8 +8,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
+ * *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  **/
@@ -1355,6 +1354,23 @@ namespace DGtal
     */
     static SCell sIndirectIncident( SCell p, Dimension k );
 
+    
+    /** @brief For a given surfel ((n-1)-signed cell), returns its interior voxel
+     * (point in Z^d given by the direct incident n-cell to the given cell).
+     *
+     * @param c any signed pre-cell.
+     * @return the inner voxel.
+     */
+    static Point interiorVoxel( const SCell & c ) ;
+
+    /** @brief For a given surfel ((n-1)-signed cell), returns its exterior voxel
+     * (point in Z^d given by the indirect incident n-cell to the given cell).
+     *
+     * @param c any signed pre-cell.
+     * @return the outer voxel.
+     */
+    static Point exteriorVoxel( const SCell & c ) ;
+    
     /// @}
 
 

@@ -94,7 +94,6 @@ namespace DGtal
     /****** Associated types *********************/
     using Space = typename DigitalSet::Space;
     using Space2D = SpaceND<2, typename Space::Integer>;
-    using MeshFace = std::vector< unsigned int >;
     using Domain   = typename DigitalSet::Domain;
     using PointR3  = typename Space::RealPoint;
     using VectorR3 = typename Space::RealPoint;
@@ -155,7 +154,7 @@ namespace DGtal
 
     // ----------------------- Internal services ------------------------------
     ///Enum type when deciding if a 2D point belongs to a 2D triangle.
-    enum TriangleOrientation { OUTSIDE, INSIDE, ONEDGE, ONVERTEX };
+    enum TriangleOrientation { TRIANGLE_OUTSIDE, TRIANGLE_INSIDE, TRIANGLE_ONEDGE, TRIANGLE_ONVERTEX };
 
     /**
      * Compute (unsigned) distance between @a p and the Euclidean plane

@@ -1,38 +1,74 @@
-# Enable floating point exception when DGtal library is loaded. Only works for gcc.
-if (UNIX AND NOT APPLE)
-  # Only used in Common.cpp
-  option(DGTAL_ENABLE_FLOATING_POINT_EXCEPTIONS "Enable feenableexcept when DGtal library is loaded." OFF)
-  mark_as_advanced(DGTAL_ENABLE_FLOATING_POINT_EXCEPTIONS)
-  if(DGTAL_ENABLE_FLOATING_POINT_EXCEPTIONS)
-    target_compile_definitions(DGtal PRIVATE -DDGTAL_ENABLE_FLOATING_POINT_EXCEPTIONS)
-  endif()
-endif()
-
 set(VERBOSE_DGTAL 0)
 set(DEBUG_VERBOSE_DGTAL 0)
 set(COLOR_WITH_ALPHA_ARITH_DGTAL 0)
 
-if (DEBUG_VERBOSE)
+if (DGTAL_DEBUG_VERBOSE)
   set(DEBUG_VERBOSE_DGTAL 1)
   target_compile_definitions(DGtal PUBLIC -DDEBUG_VERBOSE)
   message(STATUS "Debug verbose mode activated")
 endif()
-if (VERBOSE)
+
+if (DGTAL_VERBOSE)
   set(VERBOSE_DGTAL 1)
   target_compile_definitions(DGtal PUBLIC -DVERBOSE)
   message(STATUS "Verbose mode activated")
 endif()
 
-if(COLOR_WITH_ALPHA_ARITH)
+if(DGTAL_COLOR_WITH_ALPHA_ARITH)
   set(COLOR_WITH_ALPHA_ARITH_DGTAL 1)
   target_compile_definitions(DGtal PUBLIC -DCOLOR_WITH_ALPHA_ARITH)
 endif()
 
 # -----------------------------------------------------------------------------
+# CPM and CCache specific options
+# -----------------------------------------------------------------------------
+include(cmake/CPM.cmake)
+CPMAddPackage(
+  NAME Ccache.cmake
+  GITHUB_REPOSITORY TheLartians/Ccache.cmake
+  VERSION 1.2.5
+)
+
+# -----------------------------------------------------------------------------
+# clang-format in cmake
+# -----------------------------------------------------------------------------
+CPMAddPackage(
+  NAME Format.cmake
+  VERSION 1.7.3
+  GITHUB_REPOSITORY TheLartians/Format.cmake
+  OPTIONS 
+      # set to yes skip cmake formatting
+      "FORMAT_SKIP_CMAKE YES"
+      # path to exclude (optional, supports regular expressions)
+      "CMAKE_FORMAT_EXCLUDE cmake/CPM.cmake"
+)
+# -----------------------------------------------------------------------------
 # Debug specific options
 # -----------------------------------------------------------------------------
-option(WARNING_AS_ERROR "Transform compiler warnings as errors (in Debug build type)." OFF)
-if (WARNING_AS_ERROR)
-  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Werror")
+option(DGTAL_WARNING_AS_ERROR "Transform compiler warnings as errors (in Debug build type)." OFF)
+if (DGTAL_WARNING_AS_ERROR)
+target_compile_options(DGtal PRIVATE
+  $<$<CONFIG:Debug>:
+    -Wall
+    -Wno-dangling-reference
+    -Wno-sign-compare
+    -Werror
+    -Wno-unknown-pragmas
+    -Wshadow
+    -Wunused-variable
+    -Wunused-parameter
+    -Wunused-function
+    -Wno-deprecated-copy
+    -Werror=type-limits
+    -Wno-nonnull
+    -Wno-unused-function
+    -Wunused
+    -Wno-long-long
+    -Wno-system-headers
+    -Wno-deprecated
+    -Woverloaded-virtual
+    -Wwrite-strings
+  >
+)
   message(STATUS "Warnings as Errors ENABLED.")
 endif()

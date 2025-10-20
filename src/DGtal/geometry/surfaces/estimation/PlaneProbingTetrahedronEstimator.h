@@ -60,6 +60,7 @@ namespace DGtal
         H, /**< The H-neighborhood composed of 6 points on an hexagon, see \ref PlaneProbingHNeighborhood.*/
         R, /**< The R-neighborhood composed of 6 rays, see \ref PlaneProbingRNeighborhood. */
         R1, /**< The R-neighborhood but with an optimization to reduce the number of calls to the predicate, see \ref PlaneProbingR1Neighborhood. */
+        L, /**< The L-neighborhood composed of three lattices, see \ref PlaneProbingLNeighborhood. */
     };
 
     /**
@@ -84,6 +85,10 @@ namespace DGtal
 
             case ProbingMode::R1:
                 aOs << "R1";
+                break;
+
+            case ProbingMode::L:
+                aOs << "L";
                 break;
         }
 
@@ -273,12 +278,33 @@ namespace DGtal
      * @param out the output stream where the object is written.
      */
     void selfDisplay ( std::ostream & out ) const;
-
     /**
      * Checks the validity/consistency of the object.
      * @return 'true' if the object is valid, 'false' otherwise.
      */
     bool isValid() const;
+    /**
+     * Tests whether the fixed point 'q' projects the given triangle, along the current estimated normal.
+     *
+     * @param aTriangle the 3 points of the triangle.
+     */
+    bool isProjectedInside (Triangle const& aTriangle) const;
+    /**
+     * Tests whether the fixed point 'q' projects into the base, along the current estimated normal.
+     */
+    bool isProjectedInside () const;
+    /**
+     * Checks whether the predicate is true for all vertices of 
+     * the base triangle or not.
+     * @return 'true' if the object is valid, 'false' otherwise.
+     */
+    bool isInside() const; 
+    /**
+     * Checks whether the three vectors stored in 'myM'
+     * are the columns of a unimodular matrix or not.
+     * @return 'true' if the object is valid, 'false' otherwise.
+     */
+    bool isUnimodular() const;
 
     // ------------------------- Protected Datas ------------------------------
   protected:
@@ -294,13 +320,7 @@ namespace DGtal
 
     // ------------------------- Hidden services ------------------------------
   protected:
-    /**
-     * Tests whether the fixed point 'q' projects the given triangle, along the current estimated normal.
-     *
-     * @param aTriangle the 3 points of the triangle.
-     */
-    bool isProjectedInside (Triangle const& aTriangle) const;
-
+    
     // ------------------------- Internals ------------------------------------
   private:
     /**

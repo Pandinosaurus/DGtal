@@ -41,12 +41,21 @@
 
 //////////////////////////////////////////////////////////////////////////////
 // Inclusions
+#include <DGtal/base/BasicTypes.h>
 #include <iostream>
-#include "DGtal/base/Common.h"
-#include <boost/lexical_cast.hpp>
 #include <algorithm>
 #include <array>
+#include <string>
 //////////////////////////////////////////////////////////////////////////////
+
+#ifndef secured_sprintf
+#if defined( WIN32 )
+#define secured_sprintf sprintf_s
+#else
+#include <stdio.h>
+#define secured_sprintf snprintf
+#endif // defined( WIN32 )
+#endif
 
 namespace DGtal
 {
@@ -192,7 +201,7 @@ namespace DGtal
     std::array<double, 3> getHSV() const
     {
       double h,s,v;
-      Color::RGBtoHSV(h,s,v, this->r(), this->g(), this->b());
+      Color::RGBtoHSV(h,s,v, this->red(), this->green(), this->blue());
       return {h,s,v};
     }
     

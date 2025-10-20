@@ -29,9 +29,24 @@
 
 //////////////////////////////////////////////////////////////////////////////
 #include <cstdlib>
+
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wall"
+#pragma GCC diagnostic ignored "-Wextra"
+#pragma GCC diagnostic ignored "-Wpedantic"
+#pragma GCC diagnostic ignored "-Wshadow"
+#pragma GCC diagnostic ignored "-Wtype-limits"
+#pragma GCC diagnostic ignored "-Wtautological-compare"
+#endif
 #include <boost/iostreams/filtering_streambuf.hpp>
 #include <boost/iostreams/copy.hpp>
 #include <boost/iostreams/filter/zlib.hpp>
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 
@@ -83,9 +98,9 @@ DGtal::VolReader<T, TFunctor>::importVol( const std::string & filename,
     char buf[128];
     int linecount = 1;
     int fieldcount = 0;
-    
+    char *line;
     // Read the file line by line until ".\n" is found
-    for (  char *line = fgets( buf, 128, fin );
+    for (  line = fgets( buf, 128, fin );
          line && strcmp( line, ".\n" ) != 0 ;
          line = fgets( line, 128, fin ), ++linecount
          )
@@ -190,10 +205,10 @@ DGtal::VolReader<T, TFunctor>::importVol( const std::string & filename,
     {
       T image( domain );
       
-      long count = 0;
+      size_t count = 0;
       unsigned char val;
       typename T::Domain::ConstIterator it = domain.begin();
-      long int total = sx * sy * sz;
+      size_t total = sx * sy * sz;
       std::stringstream main;
       
       //main read loop
@@ -206,7 +221,7 @@ DGtal::VolReader<T, TFunctor>::importVol( const std::string & filename,
       
       if ( count != total )
       {
-        trace.error() << "VolReader: can't read file (raw data) !\n";
+        trace.error() << "VolReader: can't read file (raw data). I read "<<count<<" bytes instead of "<<total<<".\n";
         throw dgtalexception;
       }
       
@@ -219,7 +234,7 @@ DGtal::VolReader<T, TFunctor>::importVol( const std::string & filename,
         in.push(main);
         boost::iostreams::copy(in, uncompressed);
         //Apply to the image structure
-        for(auto i=0; i < total; ++i)
+        for(size_t i=0; i < total; ++i)
         {
           val = uncompressed.get();
           image.setValue(( *it ), aFunctor(val) );
@@ -229,7 +244,7 @@ DGtal::VolReader<T, TFunctor>::importVol( const std::string & filename,
       else
       {
         //Apply to the image structure
-      for(auto i=0; i < total; ++i)
+      for(size_t i=0; i < total; ++i)
       {
         val = main.get();
         image.setValue(( *it ), aFunctor(val) );

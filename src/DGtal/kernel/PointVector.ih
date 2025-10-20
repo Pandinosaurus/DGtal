@@ -35,7 +35,6 @@
 #include <cstdlib>
 #include <cmath>
 #include <DGtal/base/BasicFunctors.h>
-#include "DGtal/io/Color.h"
 //////////////////////////////////////////////////////////////////////////////
 
 
@@ -102,11 +101,6 @@ PointVector(const PointVector<dim, OtherComponent, OtherStorage> & apoint1,
   for ( Dimension i = 0; i < dim; ++i )
     myArray[ i ] = static_cast<TComponent>( f( apoint1[i] ) );
 }
-//------------------------------------------------------------------------------
-template<DGtal::Dimension dim, typename TComponent, typename TContainer>
-inline
-DGtal::PointVector<dim, TComponent, TContainer>::~PointVector()
-{}
 //------------------------------------------------------------------------------
 template<DGtal::Dimension dim, typename TComponent, typename TContainer>
 inline
@@ -1036,7 +1030,7 @@ DGtal::PointVector<dim, TComponent, TContainer>::normInfinity() const
     {
       tmp =  ( myArray[ i ] >= 0 ) ? myArray[ i ] : -myArray[ i ] ;
       if ( tmp > val )
-  val = tmp;
+        val = tmp;
     }
   return val;
 }
@@ -1047,7 +1041,7 @@ inline
 typename DGtal::PointVector<dim, double, std::array<double,dim> >
 DGtal::PointVector<dim, TComponent, TContainer>::getNormalized() const
 {
-  PointVector<dim,double,std::array<double,dim> > normalized =(*this);
+  PointVector<dim,double,std::array<double,dim> > normalized(*this);
   normalized /= normalized.norm();
   return normalized;
 }
@@ -1078,10 +1072,10 @@ inline
 void
 DGtal::PointVector<dim,TComponent, TContainer>::selfDisplay( std::ostream & out ) const
 {
-  out << "[PointVector] {";
+  out << "(";
   for (DGtal::Dimension i = 0; i < dimension ; ++i)
     out << myArray[ i ] << (i == dimension - 1 ? "" : ", ");
-  out << "}";
+  out << ")";
 }
 
 //------------------------------------------------------------------------------

@@ -43,10 +43,22 @@
 /** Prevents repeated inclusion of headers. */
 #define MPolynomial_h
 
+
+//David Coeurjolly: too many deprecation warnings
+//There are pragma pop at the end of this file.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 // Inclusions
 #include <iostream>
 #include <vector>
+// std::allocator_traits (as a replacement of removes Alloc::rebind)
+#include <memory> 
 #include "DGtal/base/Common.h"
 //////////////////////////////////////////////////////////////////////////////
 
@@ -196,7 +208,7 @@ public:
         (i.e. X).
     */
     typedef MPolynomial< n - 1, X, 
-                         typename Alloc::template rebind<X>::other > MPolyNM1;
+                         typename std::allocator_traits<Alloc>::template rebind_alloc<X> > MPolyNM1;
 
     template<int nn, class TT, class AA, class SS>
     friend class MPolynomialEvaluator;
@@ -410,7 +422,7 @@ public:
     typedef TX X;
     typedef MPolynomial< n, Ring, Alloc > MPolyN;
     typedef MPolynomial< n - 1, X, 
-                         typename Alloc::template rebind<X>::other > MPolyNM1;
+                         typename std::allocator_traits<Alloc>::template rebind_alloc<X> > MPolyNM1;
   private:
     const MPolyN & myPoly; ///< The polynomial in question
     const X & myEvalPoint; ///< the evaluation point
@@ -794,18 +806,21 @@ public:
   {
   public:
     typedef TAlloc Alloc;
-    typedef typename std::vector<typename Alloc::pointer, typename Alloc::template rebind<typename Alloc::pointer>::other>::size_type Size;
+    typedef typename std::allocator_traits<Alloc>::pointer TPointer;
+    typedef typename std::vector<TPointer, typename std::allocator_traits<Alloc>::template rebind_alloc<TPointer> >::size_type Size;
    
   private:
     Alloc myAllocator;
-    std::vector<typename Alloc::pointer, typename Alloc::template rebind<typename Alloc::pointer>::other> myVec;
+    std::vector<TPointer, typename std::allocator_traits<Alloc>::template rebind_alloc<TPointer> > myVec;
     
-    void create( Size begin, Size end, typename Alloc::const_reference entry)
+    // Previous : typename Alloc::const_reference
+    // const value_type& should be equivalent according to : https://stackoverflow.com/questions/16360068/why-is-allocatorreference-being-phased-out 
+    void create( Size begin, Size end, const typename Alloc::value_type& entry)
     {
       for (Size i = begin; i < end; ++i)
         {
           myVec[i] = myAllocator.allocate(sizeof(T));
-          myAllocator.construct(myVec[i], entry);
+          std::allocator_traits<Alloc>::construct(myAllocator, myVec[i], entry);
         }
     }
     
@@ -813,18 +828,18 @@ public:
     {
       for (Size i = begin; i < end; ++i)
         {
-          myAllocator.destroy(myVec[i]);
+          std::allocator_traits<Alloc>::destroy(myAllocator, myVec[i]);
           myAllocator.deallocate(myVec[i], sizeof(T));
         }
     }
     
     template<class A>
-    void copy_from(const std::vector<typename Alloc::pointer, A> & source)
+    void copy_from(const std::vector<TPointer, A> & source)
     {
       for (Size i = 0; i < myVec.size(); ++i)
         {
           myVec[i] = myAllocator.allocate(sizeof(T));
-          myAllocator.construct(myVec[i], *source[i]);
+          std::allocator_traits<Alloc>::construct(myAllocator, myVec[i], *source[i]);
         }
     }
     
@@ -981,7 +996,7 @@ public:
        adequate allocators. This is for efficiency purposes.
     */
     typedef IVector< MPolyNM1, 
-                     typename Alloc::template rebind<MPolyNM1 >::other, (n>1) >
+                     typename std::allocator_traits<Alloc>::template rebind_alloc<MPolyNM1>, (n > 1) >
     Storage;
     typedef typename Storage::Size Size;
 
@@ -2085,6 +2100,10 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 // Includes inline functions.
 #include "DGtal/math/MPolynomial.ih"
+
+#pragma GCC diagnostic pop
+#pragma clang diagnostic pop
+
 
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////

@@ -55,7 +55,7 @@ template <typename Quotient>
 bool
 equalCFrac( const std::vector<Quotient> & c1, const std::vector<Quotient> & c2 )
 {
-  unsigned int s = c1.size() < c2.size() ? c1.size() : c2.size();
+  auto s = c1.size() < c2.size() ? c1.size() : c2.size();
   if ( ( s != c1.size() ) && ( c1.back() != NumberTraits<Quotient>::ONE ) )
     return false;
   if ( ( s != c2.size() ) && ( c2.back() != NumberTraits<Quotient>::ONE ) )
@@ -79,16 +79,16 @@ bool testReducedFraction()
   typedef typename SB::Fraction Fraction;
   unsigned int nbok = 0;
   unsigned int nb = 0;
-  Integer p = rand() / 10000;
-  Integer q = rand() / 10000;
+  Integer p = ( rand() % 10000 ) + 1;
+  Integer q = ( rand() % 10000 ) + 1;
   trace.beginBlock ( "Testing block: reduced fraction." );
   IntegerComputer<Integer> ic;
   Integer g = ic.gcd( p, q );
   p /= g;
   q /= g;
   IntegerComputer<Quotient> ics;
-  Quotient sp = NumberTraits<Integer>::castToInt64_t( p );
-  Quotient sq = NumberTraits<Integer>::castToInt64_t( q );
+  Quotient sp = (Quotient)NumberTraits<Integer>::castToInt64_t( p );
+  Quotient sq = (Quotient)NumberTraits<Integer>::castToInt64_t( q );
   std::vector<Quotient> cf1;
   ics.getCFrac( cf1, sp, sq );
   Fraction f1 = SB::fraction( p, q );
@@ -103,7 +103,7 @@ bool testReducedFraction()
   trace.info() << "(" << nbok << "/" << nb << ") " 
                << " cfrac"
                << std::endl;
-  unsigned int depth = cf1.size();
+  const auto depth = cf1.size();
   for ( unsigned int k = 1; k < depth; ++k )
     {
       std::vector<Quotient> cf1_red;
@@ -130,9 +130,10 @@ bool testInitFraction()
   typedef typename SB::Fraction Fraction;
   unsigned int nbok = 0;
   unsigned int nb = 0;
-  Integer p = rand() / 10000;
-  Integer q = rand() / 10000;
+  Integer p = ( rand() % 10000 ) + 1;
+  Integer q = ( rand() % 10000 ) + 1;
   trace.beginBlock ( "Testing block: init fraction." );
+  trace.info() << "Init p / q = " << p << " / " << q << std::endl;
   IntegerComputer<Integer> ic;
   Integer g = ic.gcd( p, q );
   p /= g;
@@ -163,8 +164,8 @@ bool testPattern()
   typedef typename MyPattern::Vector2I Vector2I;
   unsigned int nbok = 0;
   unsigned int nb = 0;
-  Integer p = rand() / 10000;
-  Integer q = rand() / 10000;
+  Integer p = ( rand() % 10000 ) + 1;
+  Integer q = ( rand() % 10000 ) + 1;
   MyPattern pattern( p*6, q*6 );
   trace.info() << pattern << endl;
 

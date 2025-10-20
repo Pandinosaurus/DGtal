@@ -82,6 +82,49 @@ SurfaceMesh< PointVector<3,double>,
                       faces.cbegin(), faces.cend() );
 }
 
+
+SurfaceMesh< PointVector<3,double>,
+PointVector<3,double> > makeNonManifoldBoundary()
+{
+  typedef PointVector<3,double>                 RealPoint;
+  typedef PointVector<3,double>                 RealVector;
+  typedef SurfaceMesh< RealPoint, RealVector >  PolygonMesh;
+  typedef PolygonMesh::Vertices                 Vertices;
+  std::vector< RealPoint > positions;
+  std::vector< Vertices  > faces;
+  positions.push_back( RealPoint( 0, 0, 1 ) );
+  positions.push_back( RealPoint( 0, -1, 0 ) );
+  positions.push_back( RealPoint( 1, 0, 0 ) );
+  positions.push_back( RealPoint( 0, 1, 0 ) );
+  positions.push_back( RealPoint( 0, 0, 0 ) );
+  faces.push_back( { 0, 4, 1 } );
+  faces.push_back( { 0, 4, 2 } );
+  faces.push_back( { 0, 4, 3 } );
+  return PolygonMesh( positions.cbegin(), positions.cend(),
+                     faces.cbegin(), faces.cend() );
+}
+
+SurfaceMesh< PointVector<3,double>,
+PointVector<3,double> > makeTetrahedron()
+{
+  typedef PointVector<3,double>                 RealPoint;
+  typedef PointVector<3,double>                 RealVector;
+  typedef SurfaceMesh< RealPoint, RealVector >  PolygonMesh;
+  typedef PolygonMesh::Vertices                 Vertices;
+  std::vector< RealPoint > positions;
+  std::vector< Vertices  > faces;
+  positions.push_back( RealPoint( 0, 0, 0 ) );
+  positions.push_back( RealPoint( 1, 0, 0 ) );
+  positions.push_back( RealPoint( 0, 1, 0 ) );
+  positions.push_back( RealPoint( 0, 0, 1 ) );
+  faces.push_back( { 0, 1, 2 } );
+  faces.push_back( { 1, 0, 3 } );
+  faces.push_back( { 0, 2, 3 } );  
+  faces.push_back( { 3, 2, 1 } );
+  return PolygonMesh( positions.cbegin(), positions.cend(),
+                     faces.cbegin(), faces.cend() );
+}
+
 SCENARIO( "SurfaceMesh< RealPoint3 > concept check tests", "[surfmesh][concepts]" )
 {
   typedef PointVector<3,double>                RealPoint;
@@ -96,7 +139,6 @@ SCENARIO( "SurfaceMesh< RealPoint3 > build tests", "[surfmesh][build]" )
   typedef PointVector<3,double>                 RealVector;
   typedef SurfaceMesh< RealPoint, RealVector >  PolygonMesh;
   typedef PolygonMesh::Vertices                 Vertices;
-  typedef PolygonMesh::Face                     Face;
   typedef PolygonMesh::Edge                     Edge;
   typedef PolygonMesh::Vertex                   Vertex;
   GIVEN( "A box with an open side" ) {
@@ -121,6 +163,11 @@ SCENARIO( "SurfaceMesh< RealPoint3 > build tests", "[surfmesh][build]" )
         REQUIRE( polymesh.nbFaces() == 6 );
         REQUIRE( polymesh.Euler() == 1 );
       }
+    THEN( "Checking distances." )
+    {
+      REQUIRE( polymesh.distance(0,0) == Approx(0.0) );
+      REQUIRE( polymesh.distance(0,7) == Approx(std::sqrt(3)));
+    }
     THEN( "Breadth-first visiting the mesh from vertex 0, visit {0}, then {1,2,4}, then {3,5,6,9}, then {7,8}." )
       {
         BreadthFirstVisitor< PolygonMesh > visitor( polymesh, 0 );
@@ -147,7 +194,7 @@ SCENARIO( "SurfaceMesh< RealPoint3 > build tests", "[surfmesh][build]" )
           = std::equal( distances.begin(), distances.end(), expected_distance );
         REQUIRE( distances_ok );
       }      
-    THEN( "The mesh has 6 boundary edges and 9 manifold inner consistent edges" ) {
+    THEN( "The mesh has 6 boundary edges and 9 manifold inner consistent edges, the boundary is a 1d manifold" ) {
       auto mani_bdry    = polymesh.computeManifoldBoundaryEdges();
       auto mani_inner   = polymesh.computeManifoldInnerEdges();
       auto mani_inner_c = polymesh.computeManifoldInnerConsistentEdges();
@@ -209,7 +256,6 @@ SCENARIO( "SurfaceMesh< RealPoint3 > mesh helper tests", "[surfmesh][helper]" )
 {
   typedef PointVector<3,double>                      RealPoint;
   typedef PointVector<3,double>                      RealVector;
-  typedef SurfaceMesh< RealPoint, RealVector >       PolygonMesh;
   typedef SurfaceMeshHelper< RealPoint, RealVector > PolygonMeshHelper;
   typedef PolygonMeshHelper::NormalsType             NormalsType;
   GIVEN( "A sphere of radius 10" ) {
@@ -307,3 +353,164 @@ SCENARIO( "SurfaceMesh< RealPoint3 > reader/writer tests", "[surfmesh][io]" )
     }
   }
 }
+
+SCENARIO( "SurfaceMesh< RealPoint3 > boundary tests", "[surfmesh][boundary]" )
+{
+  auto polymesh  = makeNonManifoldBoundary();
+  auto polymesh2 = makeBox();
+  WHEN( "Checking the topology of the mesh boundary" ) {
+    auto chains = polymesh2.computeManifoldBoundaryChains();
+    THEN( "The box as a manifold boundary" ) {
+      CAPTURE(chains);
+      REQUIRE( polymesh2.isBoundariesManifold() == true);
+      REQUIRE( polymesh2.isBoundariesManifold(false) == true);
+      REQUIRE( chains.size() == 1);
+      REQUIRE( chains[0].size() == 6);
+    }
+    THEN( "The extra mesh does not have a manifold boundary" ) {
+      REQUIRE( polymesh.isBoundariesManifold() == false);
+    }
+  }
+}
+
+SCENARIO( "SurfaceMesh< RealPoint3 > flippable tests", "[surfmesh][flip]" )
+{
+  typedef PointVector<3,double>                      RealPoint;
+  typedef PointVector<3,double>                      RealVector;
+  typedef SurfaceMesh< RealPoint, RealVector >       PolygonMesh;
+  typedef PolygonMesh::Edge                          Edge;  
+  typedef SurfaceMeshHelper< RealPoint, RealVector > PolygonMeshHelper;
+  typedef PolygonMeshHelper::NormalsType             NormalsType;
+  auto meshBox     = makeBox();
+  auto meshTetra   = makeTetrahedron();
+  auto meshLantern = PolygonMeshHelper::makeLantern( 3.0, 3.0, RealPoint::zero,
+						   10, 10, NormalsType::NO_NORMALS );
+  auto meshTorus   = PolygonMeshHelper::makeTorus( 3.0, 1.0, RealPoint::zero,
+                                                  10, 10, 0, NormalsType::NO_NORMALS );
+  WHEN( "Checking if one can flip box edges" ) {
+    auto nb_flippable = 0;
+    for ( Edge e = 0; e < meshBox.nbEdges(); e++ )
+      if ( meshBox.isFlippable( e ) ) nb_flippable++;
+    THEN( "No box edges are flippable (they border quads)" ) {
+      REQUIRE( nb_flippable == 0 );
+    }
+  }
+  WHEN( "Checking if one can flip tetrahedron edges" ) {
+    auto nb_flippable = 0;
+    for ( Edge e = 0; e < meshTetra.nbEdges(); e++ )
+      if ( meshTetra.isFlippable( e ) ) nb_flippable++;
+    THEN( "No tetrahedron edges are flippable (the neihgborhood is not simply connected)" ) {
+      REQUIRE( nb_flippable == 0 );
+    }
+  }
+  WHEN( "Checking if one can flip torus edges" ) {
+    Edge nb_flippable = 0;
+    for ( Edge e = 0; e < meshTorus.nbEdges(); e++ )
+      if ( meshTorus.isFlippable( e ) ) nb_flippable++;
+    THEN( "All torus edges are flippable (it is a closed triangulated surface)" ) {
+      REQUIRE( nb_flippable == meshTorus.nbEdges() );
+    }
+  }
+  WHEN( "Checking if one can flip lantern edges" ) {
+    auto bdry_edges  = meshLantern.computeManifoldBoundaryEdges();
+    auto inner_edges = meshLantern.computeManifoldInnerEdges();
+    Edge nb_flippable       = 0;
+    Edge nb_bdry_flippable  = 0;
+    Edge nb_inner_flippable = 0;    
+    for ( Edge e = 0; e < meshLantern.nbEdges(); e++ )
+      if ( meshLantern.isFlippable( e ) ) nb_flippable++;
+    for ( Edge e : bdry_edges )
+      if ( meshLantern.isFlippable( e ) ) nb_bdry_flippable++;
+    for ( Edge e : inner_edges )
+      if ( meshLantern.isFlippable( e ) ) nb_inner_flippable++;
+    THEN( "Innner lantern edges are flippable while boundary edges are not flippable" ) {
+      REQUIRE( nb_flippable == inner_edges.size() );
+      REQUIRE( nb_bdry_flippable == 0 );
+      REQUIRE( nb_flippable == nb_inner_flippable );
+      REQUIRE( nb_flippable == ( meshLantern.nbEdges() - bdry_edges.size() ) );
+    }
+  }
+}
+
+SCENARIO( "SurfaceMesh< RealPoint3 > flip tests", "[surfmesh][flip]" )
+{
+  typedef PointVector<3,double>                      RealPoint;
+  typedef PointVector<3,double>                      RealVector;
+  typedef SurfaceMesh< RealPoint, RealVector >       PolygonMesh;
+  typedef PolygonMesh::Edge                          Edge;  
+  typedef SurfaceMeshHelper< RealPoint, RealVector > PolygonMeshHelper;
+  typedef PolygonMeshHelper::NormalsType             NormalsType;
+  auto meshLantern = PolygonMeshHelper::makeLantern( 3.0, 3.0, RealPoint::zero,
+						     10, 10, NormalsType::NO_NORMALS );
+  auto bdry_edges  = meshLantern.computeManifoldBoundaryEdges();
+  auto euler       = meshLantern.Euler();
+  auto nb_flipped  = 0;
+  for ( auto i = 0; i < 100; i++ )
+    {
+      Edge e = rand() % meshLantern.nbEdges();
+      if ( meshLantern.isFlippable( e ) )
+	{
+	  meshLantern.flip( e, false );
+	  nb_flipped++;
+	}
+    }
+  WHEN( "Flipping 100 random edges" ) {
+    THEN( "More than 50 edges were flipped" ) {
+      REQUIRE( nb_flipped > 50 );
+    }
+    THEN( "Euler number is not changed" ) {
+      auto post_euler = meshLantern.Euler();
+      REQUIRE( euler == post_euler );
+    }
+    THEN( "Boundary is unchanged" ) {
+      auto post_bdry_edges  = meshLantern.computeManifoldBoundaryEdges();      
+      REQUIRE( bdry_edges.size() == post_bdry_edges.size() );
+    }
+  }
+}
+
+SCENARIO( "SurfaceMesh< RealPoint3 > restore lantern with flips tests", "[surfmesh][flip]" )
+{
+  typedef PointVector<3,double>                      RealPoint;
+  typedef PointVector<3,double>                      RealVector;
+  typedef SurfaceMesh< RealPoint, RealVector >       PolygonMesh;
+  typedef PolygonMesh::Edge                          Edge;
+  typedef SurfaceMeshHelper< RealPoint, RealVector > PolygonMeshHelper;
+  typedef SurfaceMeshWriter< RealPoint, RealVector > PolygonMeshWriter;
+  typedef PolygonMeshHelper::NormalsType             NormalsType;
+  auto meshLantern = PolygonMeshHelper::makeLantern( 3.0, 3.0, RealPoint::zero,
+                                                     10, 10, NormalsType::NO_NORMALS );
+  {
+    std::ofstream output( "lantern.obj" );
+    PolygonMeshWriter::writeOBJ( output, meshLantern );
+    output.close();
+  }
+  Edge nb_flipped = 0;
+  const auto&   X = meshLantern.positions();
+  for ( Edge e = 0; e < meshLantern.nbEdges(); e++ )
+    {
+      if ( meshLantern.isFlippable( e ) )
+	{
+	  auto   ij    = meshLantern.edgeVertices ( e );
+	  auto   kl    = meshLantern.otherDiagonal( e );
+	  double l2_ij = ( X[ ij.first ] - X[ ij.second ] ).squaredNorm();
+	  double l2_kl = ( X[ kl.first ] - X[ kl.second ] ).squaredNorm();
+	  if ( l2_kl < l2_ij )
+	    {
+	      meshLantern.flip( e, false );
+	      nb_flipped++;
+	    }
+	}
+    }
+  {
+    std::ofstream output( "flipped-lantern.obj" );
+    PolygonMeshWriter::writeOBJ( output, meshLantern );
+    output.close();
+  }
+  WHEN( "Flipping all long edges" ) {
+    THEN( "80 edges were flipped" ) {
+      REQUIRE( nb_flipped == 80 );
+    }
+  }
+}
+  

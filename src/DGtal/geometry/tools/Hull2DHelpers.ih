@@ -30,6 +30,8 @@
 //////////////////////////////////////////////////////////////////////////////
 #include <cstdlib>
 #include <cmath>
+#include <boost/utility.hpp>
+#include <boost/next_prior.hpp>
 
 #include "DGtal/kernel/PointVector.h"
 //////////////////////////////////////////////////////////////////////////////
@@ -334,7 +336,8 @@ namespace DGtal
                                   const ThicknessDefinition &def, 
                                   TInputPoint& antipodalEdgeP,
                                   TInputPoint& antipodalEdgeQ,
-                                  TInputPoint& antipodalVertexR){
+                                  TInputPoint& antipodalVertexR)
+      {
         struct WrapIt{
           WrapIt(const ForwardIterator &b, const ForwardIterator &e): myB(b), myE(e),
                       mySize(std::distance(b, e)){}
@@ -344,13 +347,13 @@ namespace DGtal
           }
           ForwardIterator myB;
           ForwardIterator myE;
-          unsigned int mySize;
+          size_t mySize;
         };
         WrapIt aConvexHull(itb, ite);
         double resThickness = std::numeric_limits<double>::max();
         unsigned int i = 0;
         unsigned int j = 1;
-        unsigned int size = aConvexHull.mySize;
+        const auto size = aConvexHull.mySize;
         if(size<3)
           {
           if(size>0)
@@ -361,8 +364,8 @@ namespace DGtal
             }
           return 0.0;
           }
-        
-        while(getAngle(aConvexHull[i], aConvexHull[i+1], aConvexHull[j], aConvexHull[j+1]) < M_PI ){
+        while(getAngle(aConvexHull[i], aConvexHull[i+1],
+                       aConvexHull[j], aConvexHull[j+1]) < M_PI - angleTolerance ){
           j++;
         }
         double th = getThicknessAntipodalPair(aConvexHull[i], aConvexHull[i+1], aConvexHull[j], def);
@@ -375,7 +378,7 @@ namespace DGtal
         i++;
         while(i < size){        
           if(getAngle(aConvexHull[i], aConvexHull[i+1], 
-                      aConvexHull[j], aConvexHull[j+1])<M_PI){
+                      aConvexHull[j], aConvexHull[j+1])< M_PI - angleTolerance){
             j++;
           }else{            
             th = getThicknessAntipodalPair(aConvexHull[i], aConvexHull[i+1], 
@@ -386,8 +389,8 @@ namespace DGtal
               antipodalEdgeP = aConvexHull[i];
               antipodalEdgeQ = aConvexHull[i+1];
             }
-            if(getAngle(aConvexHull[i], aConvexHull[i+1], 
-                        aConvexHull[j], aConvexHull[j+1])==M_PI){
+            if(isCoLinearOpp(aConvexHull[i], aConvexHull[i+1], 
+                          aConvexHull[j], aConvexHull[j+1])   ){
               
               th = getThicknessAntipodalPair(aConvexHull[i], aConvexHull[i+1], 
                                              aConvexHull[j+1], def);
@@ -403,16 +406,31 @@ namespace DGtal
         }
         return resThickness;
       }
-                  
-
+      
+            
       template<typename TInputPoint>
       inline
-      double getAngle(const TInputPoint &a, const TInputPoint &b, const TInputPoint &c, const TInputPoint &d){
-        double angle1 = atan2(b[1]-a[1], b[0]-a[0]);
-        double angle2 = atan2(d[1]-c[1], d[0]-c[0]);        
-        double r =angle2-angle1;
-        return  ( r < 0) ? 2*M_PI+r :r;        
+      double getAngle(const TInputPoint &a, const TInputPoint &b, const TInputPoint &c, const TInputPoint &d)
+      {
+        TInputPoint  v1 (b-a);
+        TInputPoint v2 (d-c);
+        double det = (v1[0]*v2[1] - v1[1]*v2[0])/ (v1.norm()*v2.norm());
+        double dot = (v1[0]*v2[0] + v1[1]*v2[1])/ (v1.norm()*v2.norm());
+        double ang = atan2(det, dot);
+        return ( ang < -angleTolerance) ? 2*M_PI+ang : ang;
       }
+ 
+ 
+      template<typename TInputPoint>
+      inline
+      bool isCoLinearOpp(const TInputPoint& a, const TInputPoint& b,
+                       const TInputPoint& c,const  TInputPoint& d)
+      {
+        double ang = getAngle(a, b, c, d);
+        return ang  < M_PI + angleTolerance  &&
+               ang  > M_PI - angleTolerance ;
+      }
+
       
 
       template<typename TInputPoint>

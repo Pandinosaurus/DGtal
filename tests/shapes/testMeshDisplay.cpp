@@ -32,7 +32,7 @@
 #include "DGtal/base/Common.h"
 #include "DGtal/helpers/StdDefs.h"
 #include "DGtal/shapes/Mesh.h"
-#include "DGtal/io/viewers/Viewer3D.h"
+#include "DGtal/io/viewers/PolyscopeViewer.h"
 //! [MeshUseInclude]
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -56,9 +56,7 @@ int main( int argc, char** argv )
     trace.info() << " " << argv[ i ];
   trace.info() << endl;
   //! [MeshUseInitDisplay]
-  QApplication application(argc,argv);
-  Viewer3D<> viewer;
-  viewer.show();
+  PolyscopeViewer viewer;
   //! [MeshUseInitDisplay]
 
   //! [MeshUseMeshCreation]
@@ -82,7 +80,7 @@ int main( int argc, char** argv )
   aMesh.addTriangularFace(0, 1, 2, Color(150,0,150,104));
   aMesh.addQuadFace(6,5,4,3, Color::Blue);
 
-  vector<unsigned int> listIndex;
+  Mesh<Point>::MeshFace listIndex;
   listIndex.push_back(7);
   listIndex.push_back(8);
   listIndex.push_back(9);
@@ -93,14 +91,13 @@ int main( int argc, char** argv )
   aMesh.addFace(listIndex, Color(150,150,0,54));
   //! [MeshUseMeshCreation]
   //! [MeshUseDisplay]
-  viewer.setLineColor(Color(150,0,0,254));
   viewer << aMesh;
-  viewer << Viewer3D<>::updateDisplay;
-  bool res = application.exec();
+
   //! [MeshUseDisplay]
-  trace.emphase() << ( res ? "Passed." : "Error." ) << endl;
+  trace.emphase() << "Passed." << endl;
   trace.endBlock();
-  return res ? 0 : 1;
+  viewer.show();
+  return 0;
 }
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////

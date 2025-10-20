@@ -54,6 +54,78 @@
 
 namespace DGtal
 {
+
+    namespace detail {
+
+    /// Indicates which integer type should be used by ConvexityHelper,
+    /// depending on the integral type of each point coordinate and if
+    /// computations should be guaranteed or not.
+    ///
+    /// @tparam TIntegerCoordinate the integral type of each point
+    /// coordinate.
+    ///
+    /// @tparam safe when 'true' chooses the safest type for
+    /// computations, otherwise it privileges speed.
+    template < typename TIntegerCoordinate, bool safe >
+    struct ConvexityHelperInternalInteger {
+      typedef TIntegerCoordinate Type;
+    };
+
+    /// Indicates which integer type should be used by ConvexityHelper,
+    /// depending on the integral type of each point coordinate and if
+    /// computations should be guaranteed or not.
+    ///
+    /// Specialization for integer coordinate int32_t and safe computations.
+    template < >
+    struct ConvexityHelperInternalInteger< DGtal::int32_t, true > {
+      typedef DGtal::BigInteger Type;
+    };
+
+    /// Indicates which integer type should be used by ConvexityHelper,
+    /// depending on the integral type of each point coordinate and if
+    /// computations should be guaranteed or not.
+    ///
+    /// Specialization for integer coordinate int32_t and fast computations.
+    template < >
+    struct ConvexityHelperInternalInteger< DGtal::int32_t, false > {
+      typedef DGtal::int64_t Type;
+    };
+
+    /// Indicates which integer type should be used by ConvexityHelper,
+    /// depending on the integral type of each point coordinate and if
+    /// computations should be guaranteed or not.
+    ///
+    /// Specialization for integer coordinate int64_t and safe computations.
+    template < >
+    struct ConvexityHelperInternalInteger< DGtal::int64_t, true > {
+      typedef DGtal::BigInteger Type;
+    };
+
+    /// Indicates which integer type should be used by ConvexityHelper,
+    /// depending on the integral type of each point coordinate and if
+    /// computations should be guaranteed or not.
+    ///
+    /// Specialization for integer coordinate int64_t and fast computations.
+    template < >
+    struct ConvexityHelperInternalInteger< DGtal::int64_t, false > {
+      typedef DGtal::int64_t Type;
+    };
+
+    /// Indicates which integer type should be used by ConvexityHelper,
+    /// depending on the integral type of each point coordinate and if
+    /// computations should be guaranteed or not.
+    ///
+    /// Specialization for integer coordinate BigInteger.
+    ///
+    /// @tparam safe when 'true' chooses the safest type for
+    /// computations, otherwise it privileges speed.
+    template < bool safe >
+    struct ConvexityHelperInternalInteger< DGtal::BigInteger, safe > {
+      typedef DGtal::BigInteger Type;
+    };
+
+    }  // namespace detail
+  
   /////////////////////////////////////////////////////////////////////////////
   // template class ConvexityHelper
   /**
@@ -98,6 +170,7 @@ namespace DGtal
     typedef std::size_t                      Size;
     typedef std::size_t                      Index;
     typedef std::vector< Index >             IndexRange;
+    typedef std::vector< Point >             PointRange;
     typedef ConvexHullIntegralKernel< dim, Integer, InternalInteger >
     LatticeConvexHullKernel;
     typedef ConvexHullRationalKernel< dim, Integer, InternalInteger >
@@ -129,14 +202,30 @@ namespace DGtal
     ///
     /// @return the tightiest bounded lattice polytope
     /// (i.e. H-representation) including the given range of points,
-    /// or an empty polytope if the given range of points was not full
-    /// dimensional.
+    /// or an empty range if the dimension is greater than 3 and the
+    /// given range of points is not full.
     static
     LatticePolytope
-    computeLatticePolytope( const std::vector< Point >& input_points,
+    computeLatticePolytope( const PointRange& input_points,
                             bool remove_duplicates = true,
                             bool make_minkowski_summable = false );
-    
+
+    /// Computes and returns the vertices of the tightiest lattice
+    /// polytope enclosing all the given input lattice points.
+    ///
+    /// @param[in] input_points the range of input lattice points.
+    ///
+    /// @param[in] remove_duplicates should be set to 'true' if the
+    /// input data has duplicates.
+    ///
+    /// @return the vertices of the tightiest bounded lattice polytope
+    /// including the given range of points, or an empty range if the
+    /// dimension is greater than 3 and the given range of points is
+    /// not full.
+    static
+    PointRange
+    computeConvexHullVertices( const PointRange& input_points,
+                               bool remove_duplicates = true );    
 
     
     /// Computes a surface mesh representation of the boundary of the
@@ -164,7 +253,7 @@ namespace DGtal
     static
     bool
     computeConvexHullBoundary( TSurfaceMesh&               mesh,
-                               const std::vector< Point >& input_points,
+                               const PointRange& input_points,
                                bool remove_duplicates = true );
 
     /// Computes a polygonal surface representation of the boundary of the
@@ -187,7 +276,7 @@ namespace DGtal
     static
     bool
     computeConvexHullBoundary( PolygonalSurface< Point >&  polysurf,
-                               const std::vector< Point >& input_points,
+                               const PointRange& input_points,
                                bool remove_duplicates = true );
 
     /// Computes a cell complex representing the convex hull of the
@@ -208,9 +297,166 @@ namespace DGtal
     static
     bool
     computeConvexHullCellComplex( ConvexCellComplex< Point >& cell_complex,
-                                  const std::vector< Point >& input_points,
+                                  const PointRange& input_points,
                                   bool remove_duplicates = true );
 
+    /// Computes the lattice polytope enclosing a range of at most
+    /// dimension+1 distinct points.
+    ///
+    /// @note Called internally by ConvexityHelper::computeLatticePolytope.
+    ///
+    /// @note This function works for arbitrary full dimensional
+    /// simplex. If the set of points is not full dimensional, it is
+    /// able to build a non full dimensional simplex for dimensions <=
+    /// 3.
+    ///
+    /// @param input_points a range of points, with at most
+    /// dimension+1 distinct points.
+    ///
+    /// @param[in] remove_duplicates should be set to 'true' if the
+    /// input data has duplicates.
+    ///
+    /// @return the tightiest bounded lattice polytope
+    /// (i.e. H-representation) including the given range of points,
+    /// or an empty polytope if the given range of points was not full
+    /// dimensional and dimension was greater than 3.
+    static
+    LatticePolytope
+    computeSimplex( const PointRange& input_points,
+                    bool remove_duplicates = true );
+
+    /// Computes the lattice polytope enclosing a range of distinct
+    /// points, arranged such that they do not form a full dimensional
+    /// polytope.
+    ///
+    /// @note Called internally by
+    /// ConvexityHelper::computeLatticePolytope and
+    /// ConvexityHelper::computeSimplex.
+    ///
+    /// @note This function works for dimension no greater than 3.
+    ///
+    /// @param[inout] input_points a range of distinct points, which
+    /// may be changed by the method. More precisely a point may be
+    /// added (in 3D) to complete the set of points so that it forms a
+    /// full dimensional polytope.
+    ///
+    /// @return the tightiest bounded lattice polytope
+    /// (i.e. H-representation) including the given range of points,
+    /// or an empty polytope if the given range of points was not full
+    /// dimensional and dimension was greater than 3.
+    static
+    LatticePolytope
+    computeDegeneratedLatticePolytope( PointRange& input_points );
+
+    /// Computes the vertices of the tightiest lattice polytope enclosing a
+    /// range of distinct points, arranged such that they do not form
+    /// a full dimensional polytope.
+    ///
+    /// @note Called internally by
+    /// ConvexityHelper::computeLatticePolytopeVertices.
+    ///
+    /// @note This function works for dimension no greater than 3.
+    ///
+    /// @param[inout] input_points a range of distinct points, which
+    /// may be changed by the method. More precisely a point may be
+    /// added (in 3D) to complete the set of points so that it forms a
+    /// full dimensional polytope.
+    ///
+    /// @return the vertices of the tightiest bounded lattice polytope
+    /// including the given range of points,
+    /// or an empty set of vertices if the given range of points was not full
+    /// dimensional and dimension was greater than 3.
+    static
+    PointRange
+    computeDegeneratedConvexHullVertices( PointRange& input_points );
+
+    /// Computes the lattice polytope enclosing a triangle in
+    /// dimension 3. Takes care of degeneracies (non distinct points
+    /// or alignment).
+    ///
+    /// @param a any point
+    /// @param b any point
+    /// @param c any point
+    ///
+    /// @param[in] make_minkowski_summable Other constraints are added
+    /// so that we can perform axis aligned Minkowski sums on this
+    /// polytope. Useful for checking full convexity (see
+    /// moduleDigitalConvexity).
+    ///
+    /// @return the tightiest bounded lattice polytope
+    /// (i.e. H-representation) including the given triangle.
+    ///
+    /// @warning Implemented only in 3D.
+    static
+    LatticePolytope
+    compute3DTriangle( const Point& a, const Point& b, const Point& c,
+		       bool make_minkowski_summable = false );
+
+    /// Computes the lattice polytope enclosing an open triangle in
+    /// dimension 3. Takes care of degeneracies (non distinct points
+    /// or alignment).
+    ///
+    /// @param a any point
+    /// @param b any point
+    /// @param c any point
+    ///
+    /// @param[in] make_minkowski_summable Other constraints are added
+    /// so that we can perform axis aligned Minkowski sums on this
+    /// polytope. Useful for checking full convexity (see
+    /// moduleDigitalConvexity).
+    ///
+    /// @return the tightiest bounded lattice polytope
+    /// (i.e. H-representation) including the given open triangle
+    /// (i.e. without edges and vertices).
+    ///
+    /// @warning Implemented only in 3D.
+    static
+    LatticePolytope
+    compute3DOpenTriangle( const Point& a, const Point& b, const Point& c,
+			   bool make_minkowski_summable = false );
+    
+    /// Computes the lattice polytope enclosing a degenerated
+    /// triangle. The points must be aligned (or non distinct).
+    ///
+    /// @param a any point
+    /// @param b any point
+    /// @param c any point
+    ///
+    /// @return the tightiest bounded lattice polytope
+    /// (i.e. H-representation) including the given range of points.
+    static
+    LatticePolytope
+    computeDegeneratedTriangle( const Point& a, const Point& b, const Point& c );
+
+    
+    /// Computes the lattice polytope enclosing a segment.
+    ///
+    /// @param a any point 
+    /// @param b any point 
+    ///
+    /// @return the tightiest bounded lattice polytope
+    /// (i.e. H-representation) including the closed segment
+    /// `[a,b]`. It is always Minkowski summable.
+    ///
+    /// @warning Implemented only in 3D.
+    static
+    LatticePolytope
+    computeSegment( const Point& a, const Point& b );
+
+    /// Computes the lattice polytope enclosing an open segment.
+    ///
+    /// @param a any point 
+    /// @param b any point 
+    ///
+    /// @return the tightiest bounded lattice polytope
+    /// (i.e. H-representation) including the open segment
+    /// `]a,b[`. It is always Minkowski summable.
+    ///
+    /// @warning Implemented only in 3D.
+    static
+    LatticePolytope
+    computeOpenSegment( const Point& a, const Point& b );
+    
     /// @}
     
     // ----------------- lattice Delaunay services -------------------------
@@ -237,7 +483,7 @@ namespace DGtal
     static
     bool
     computeDelaunayCellComplex( ConvexCellComplex< Point >& cell_complex,
-                                const std::vector< Point >& input_points,
+                                const PointRange& input_points,
                                 bool remove_duplicates = true );
     
     /// @}
